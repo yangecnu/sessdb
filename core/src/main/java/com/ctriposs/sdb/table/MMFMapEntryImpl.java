@@ -82,15 +82,9 @@ public class MMFMapEntryImpl implements IMapEntry {
 	}
 
 	@Override
-	public long getLastAccessedTime() throws IOException {
-		int offsetInIndexFile = AbstractMapTable.INDEX_ITEM_LENGTH * index + IMapEntry.INDEX_ITEM_LAST_ACCESSED_TIME_OFFSET;
+	public long getCreatedTime() throws IOException {
+		int offsetInIndexFile = AbstractMapTable.INDEX_ITEM_LENGTH * index + IMapEntry.INDEX_ITEM_CREATED_TIME_OFFSET;
 		return this.indexMappedByteBuffer.getLong(offsetInIndexFile);
-	}
-
-	@Override
-	public void setLastAccessedTime(long lastAccessedTime) throws IOException {
-		int offsetInIndexFile = AbstractMapTable.INDEX_ITEM_LENGTH * index + IMapEntry.INDEX_ITEM_LAST_ACCESSED_TIME_OFFSET;
-		this.indexMappedByteBuffer.putLong(offsetInIndexFile, lastAccessedTime);
 	}
 
 	@Override
@@ -126,7 +120,7 @@ public class MMFMapEntryImpl implements IMapEntry {
 	public boolean isExpired() throws IOException {
 		long ttl = this.getTimeToLive();
 		if (ttl > 0) {
-			if (System.currentTimeMillis() - this.getLastAccessedTime() > ttl) return true;
+			if (System.currentTimeMillis() - this.getCreatedTime() > ttl) return true;
 		}
 		return false;
 	}

@@ -73,7 +73,7 @@ public class HashMapTableTest {
 		assertTrue(mapTable.isEmpty());
 		assertTrue(mapTable.getBackFileSize() == HashMapTable.INIT_INDEX_FILE_SIZE + HashMapTable.INIT_DATA_FILE_SIZE  + HashMapTable.INDEX_ITEM_LENGTH);
 		
-		mapTable.appendNew("key".getBytes(), "value".getBytes(), 500);
+		mapTable.appendNew("key".getBytes(), "value".getBytes(), 500, System.currentTimeMillis());
 		assertTrue(mapTable.getLevel() == 0);
 		assertTrue(mapTable.getCreatedTime() == createdTime);
 		assertTrue(mapTable.getAppendedSize() == 1);
@@ -83,7 +83,7 @@ public class HashMapTableTest {
 		assertTrue(Arrays.equals("key".getBytes(), mapEntry.getKey()));
 		assertTrue(Arrays.equals("value".getBytes(), mapEntry.getValue()));
 		assertTrue(500 == mapEntry.getTimeToLive());
-		assertTrue(System.currentTimeMillis() >= mapEntry.getLastAccessedTime());
+		assertTrue(System.currentTimeMillis() >= mapEntry.getCreatedTime());
 		assertFalse(mapEntry.isDeleted());
 		assertTrue(mapEntry.isInUse());
 		try {
@@ -92,10 +92,6 @@ public class HashMapTableTest {
 			e.printStackTrace();
 		}
 		assertTrue(mapEntry.isExpired());
-		
-		long lastAccessedTime = System.currentTimeMillis();
-		mapEntry.setLastAccessedTime(lastAccessedTime);
-		assertTrue(lastAccessedTime == mapEntry.getLastAccessedTime());
 		
 		mapEntry.markDeleted();
 		assertTrue(mapEntry.isDeleted());
@@ -113,7 +109,7 @@ public class HashMapTableTest {
 		assertTrue(mapTable.getBackFileSize() == HashMapTable.INIT_INDEX_FILE_SIZE + HashMapTable.INIT_DATA_FILE_SIZE  + HashMapTable.INDEX_ITEM_LENGTH);
 		
 		for(int i = 0; i < 100; i++) {
-			mapTable.put(("key"+i).getBytes(), ("value" + i).getBytes(), AbstractMapTable.NO_TIMEOUT);
+			mapTable.put(("key"+i).getBytes(), ("value" + i).getBytes(), AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis());
 		}
 		
 		for(int i = 0; i < 100; i++) {
@@ -144,7 +140,7 @@ public class HashMapTableTest {
 		createdTime = System.nanoTime();
 		mapTable = new HashMapTable(testDir, 0, createdTime);
 		for(int i = 0; i < 100; i++) {
-			mapTable.put(("key" + i).getBytes(), ("value" + i).getBytes(), 200);
+			mapTable.put(("key" + i).getBytes(), ("value" + i).getBytes(), 200, System.currentTimeMillis());
 		}
 		
 		try {
@@ -172,7 +168,7 @@ public class HashMapTableTest {
 		
 		int loop = 6 * 1024;
 		for(int i = 0; i < loop; i++) {
-			mapTable.appendNew(("key" + i).getBytes(), ("value" + i).getBytes(), -1);
+			mapTable.appendNew(("key" + i).getBytes(), ("value" + i).getBytes(), -1, System.currentTimeMillis());
 		}
 		
 		assertTrue(mapTable.getAppendedSize() == loop);
@@ -182,7 +178,7 @@ public class HashMapTableTest {
 			assertTrue(Arrays.equals(("key" + i).getBytes(), mapEntry.getKey()));
 			assertTrue(Arrays.equals(("value" + i).getBytes(), mapEntry.getValue()));
 			assertTrue(-1 == mapEntry.getTimeToLive());
-			assertTrue(System.currentTimeMillis() >= mapEntry.getLastAccessedTime());
+			assertTrue(System.currentTimeMillis() >= mapEntry.getCreatedTime());
 			assertFalse(mapEntry.isDeleted());
 			assertTrue(mapEntry.isInUse());
 		}
@@ -218,7 +214,7 @@ public class HashMapTableTest {
 		
 		int loop = 1024;
 		for(int i = 0; i < loop; i++) {
-			mapTable.appendNew(("key" + i).getBytes(), ("value" + i).getBytes(), -1);
+			mapTable.appendNew(("key" + i).getBytes(), ("value" + i).getBytes(), -1, System.currentTimeMillis());
 		}
 		
 		assertTrue(mapTable.getAppendedSize() == loop);
@@ -232,7 +228,7 @@ public class HashMapTableTest {
 			assertTrue(Arrays.equals(("key" + i).getBytes(), mapEntry.getKey()));
 			assertTrue(Arrays.equals(("value" + i).getBytes(), mapEntry.getValue()));
 			assertTrue(-1 == mapEntry.getTimeToLive());
-			assertTrue(System.currentTimeMillis() >= mapEntry.getLastAccessedTime());
+			assertTrue(System.currentTimeMillis() >= mapEntry.getCreatedTime());
 			assertFalse(mapEntry.isDeleted());
 			assertTrue(mapEntry.isInUse());
 		}
@@ -276,7 +272,7 @@ public class HashMapTableTest {
 				public void run() {
 					for(int i = 0; i < LOOP; i++) {
 						try {
-							mapTable.appendNew(("" + finalT).getBytes(), ("" + i).getBytes(), -1);
+							mapTable.appendNew(("" + finalT).getBytes(), ("" + i).getBytes(), -1, System.currentTimeMillis());
 						} catch (IOException e) {
 							e.printStackTrace();
 							failedCount.incrementAndGet();

@@ -11,9 +11,14 @@ public class Config {
 	private short shardNumber = 4;
 	
 	private boolean compressionEnabled = true;
+	private boolean localityEnabled = false;
 	
 	public boolean isCompressionEnabled() {
 		return compressionEnabled;
+	}
+	
+	public boolean isLocalityEnabled() {
+		return this.localityEnabled;
 	}
 	
 	/**
@@ -29,7 +34,7 @@ public class Config {
 	 * Enable snappy compression for value
 	 * 
 	 * @param compressionEnabled
-	 * @return Level Cache configuration
+	 * @return Session DB configuration
 	 */
 	public Config setCompressionEnabled(boolean compressionEnabled) {
 		this.compressionEnabled = compressionEnabled;
@@ -38,6 +43,18 @@ public class Config {
 	
 	private Config setShardNumber(short shardNumber) {
 		this.shardNumber = shardNumber;
+		return this;
+	}
+	
+	/**
+	 * Enable data access locality, if enabled, when a key/value entry is found in Level 2 FCMapTable,
+	 * it will be moved to current active HashMapTable for locality. 
+	 * 
+	 * @param localityEnabled
+	 * @return Session DB configuration
+	 */
+	public Config setLocalityEnabled(boolean localityEnabled) {
+		this.localityEnabled = localityEnabled;
 		return this;
 	}
 

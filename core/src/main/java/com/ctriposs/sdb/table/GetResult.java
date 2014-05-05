@@ -8,9 +8,11 @@ public class GetResult {
 	
 	private boolean expired;
 	
-	private boolean immutable;
+	private int Level;
 	
 	private long timeToLive;
+	
+	private long createdTime;
 
 	public boolean isFound() {
 		return value != null;
@@ -40,12 +42,12 @@ public class GetResult {
 		this.expired = expired;
 	}
 
-	public boolean isImmutable() {
-		return immutable;
+	public int getLevel() {
+		return Level;
 	}
 
-	void setImmutable(boolean immutable) {
-		this.immutable = immutable;
+	public void setLevel(int level) {
+		Level = level;
 	}
 
 	public long getTimeToLive() {
@@ -54,5 +56,13 @@ public class GetResult {
 
 	void setTimeToLive(long timeToLive) {
 		this.timeToLive = timeToLive;
+	}
+
+	public long getCreatedTime() {
+		return createdTime;
+	}
+
+	public void setCreatedTime(long createdTime) {
+		this.createdTime = createdTime;
 	}
 }

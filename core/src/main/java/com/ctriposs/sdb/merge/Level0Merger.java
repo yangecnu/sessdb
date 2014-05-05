@@ -162,7 +162,7 @@ public class Level0Merger extends Thread {
 			if (mapEntry.isDeleted() || mapEntry.isExpired()) {
 				value = new byte[] {0};
 			}
-			sortedMapTable.appendNew(mapEntry.getKey(), mapEntry.getKeyHash(), value, mapEntry.getTimeToLive(), mapEntry.getLastAccessedTime(), mapEntry.isDeleted(), mapEntry.isCompressed());
+			sortedMapTable.appendNew(mapEntry.getKey(), mapEntry.getKeyHash(), value, mapEntry.getTimeToLive(), mapEntry.getCreatedTime(), mapEntry.isDeleted(), mapEntry.isCompressed());
 			
 			if (qe1.iterator.hasNext()) {
 				Map.Entry<ByteArrayWrapper, InMemIndex> me = qe1.iterator.next();

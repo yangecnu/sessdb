@@ -155,7 +155,7 @@ public class Level1Merger extends Thread {
 						continue;
 					}
 					sortedMapTable.appendNew(mapEntry.getKey(), mapEntry.getKeyHash(), value, mapEntry.getTimeToLive(), 
-							mapEntry.getLastAccessedTime(), mapEntry.isDeleted(), mapEntry.isCompressed());
+							mapEntry.getCreatedTime(), mapEntry.isDeleted(), mapEntry.isCompressed());
 				}
 			}
 			IMapEntry me = qe1.getNextMapEntry();
@@ -176,7 +176,7 @@ public class Level1Merger extends Thread {
 				continue;
 			}
 			sortedMapTable.appendNew(mapEntry.getKey(), mapEntry.getKeyHash(), value, mapEntry.getTimeToLive(), 
-					mapEntry.getLastAccessedTime(), mapEntry.isDeleted(), mapEntry.isCompressed());
+					mapEntry.getCreatedTime(), mapEntry.isDeleted(), mapEntry.isCompressed());
 		}
 		
 		// persist metadata
@@ -239,7 +239,7 @@ public class Level1Merger extends Thread {
 					mapEntry.getKey();
 					mapEntry.getValue();
 					mapEntry.getTimeToLive();
-					mapEntry.getLastAccessedTime();
+					mapEntry.getCreatedTime();
 					queue.add(mapEntry);
 					index++;
 					count++;

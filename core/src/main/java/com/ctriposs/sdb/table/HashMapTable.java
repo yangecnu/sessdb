@@ -87,10 +87,10 @@ public class HashMapTable extends AbstractMapTable {
 	}
 	
 	// for testing
-	public IMapEntry appendNew(byte[] key, byte[] value, long timeToLive) throws IOException {
+	public IMapEntry appendNew(byte[] key, byte[] value, long timeToLive, long createdTime) throws IOException {
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		Preconditions.checkArgument(value != null && value.length > 0, "value is empty");
-		return this.appendNew(key, Arrays.hashCode(key), value, timeToLive, System.currentTimeMillis(), false, false);
+		return this.appendNew(key, Arrays.hashCode(key), value, timeToLive, createdTime, false, false);
 	}
 	
 	private IMapEntry appendTombstone(byte[] key) throws IOException {
@@ -98,13 +98,13 @@ public class HashMapTable extends AbstractMapTable {
 		return this.appendNew(key, Arrays.hashCode(key), new byte[] {0}, NO_TIMEOUT, System.currentTimeMillis(), true, false);
 	}
 	
-	private IMapEntry appendNewCompressed(byte[] key, byte[] value, long timeToLive) throws IOException {
+	private IMapEntry appendNewCompressed(byte[] key, byte[] value, long timeToLive, long createdTime) throws IOException {
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		Preconditions.checkArgument(value != null && value.length > 0, "value is empty");
-		return this.appendNew(key, Arrays.hashCode(key), value, timeToLive, System.currentTimeMillis(), false, true);
+		return this.appendNew(key, Arrays.hashCode(key), value, timeToLive, createdTime, false, true);
 	}
 	
-	private IMapEntry appendNew(byte[] key, int keyHash, byte[] value, long timeToLive, long lastAccessedTime, boolean markDelete, boolean compressed) throws IOException {
+	private IMapEntry appendNew(byte[] key, int keyHash, byte[] value, long timeToLive, long createdTime, boolean markDelete, boolean compressed) throws IOException {
 		appendLock.lock();
 		try {
 			
@@ -122,7 +122,7 @@ public class HashMapTable extends AbstractMapTable {
 			indexBuf.putInt(IMapEntry.INDEX_ITEM_KEY_LENGTH_OFFSET, key.length);
 			indexBuf.putInt(IMapEntry.INDEX_ITEM_VALUE_LENGTH_OFFSET, value.length);
 			indexBuf.putLong(IMapEntry.INDEX_ITEM_TIME_TO_LIVE_OFFSET, timeToLive);
-			indexBuf.putLong(IMapEntry.INDEX_ITEM_LAST_ACCESSED_TIME_OFFSET, lastAccessedTime);
+			indexBuf.putLong(IMapEntry.INDEX_ITEM_CREATED_TIME_OFFSET, createdTime);
 			indexBuf.putInt(IMapEntry.INDEX_ITEM_KEY_HASH_CODE_OFFSET, keyHash);
 			byte status = 1; // mark in use
 			if (markDelete) {
@@ -186,13 +186,9 @@ public class HashMapTable extends AbstractMapTable {
 				result.setExpired(true);
 				return result;
 			}
-			if (!this.immutable.get()) {
-				mapEntry.setLastAccessedTime(System.currentTimeMillis());
-			} else {
-				// hint for locality
-				result.setImmutable(true);
-			}
+			result.setLevel(this.getLevel());
 			result.setTimeToLive(mapEntry.getTimeToLive());
+			result.setCreatedTime(mapEntry.getCreatedTime());
 			
 			return result;
 		}
@@ -206,7 +202,7 @@ public class HashMapTable extends AbstractMapTable {
 		return this.immutable.get();
 	}
 
-	public boolean put(byte[] key, byte[] value, long timeToLive, boolean isDelete) throws IOException {
+	public boolean put(byte[] key, byte[] value, long timeToLive, long createdTime, boolean isDelete) throws IOException {
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		Preconditions.checkArgument(value != null && value.length > 0, "value is empty");
 		
@@ -216,7 +212,7 @@ public class HashMapTable extends AbstractMapTable {
 			mapEntry = this.appendTombstone(key);
 		} else {
 			mapEntry = this.compressionEnabled ? 
-					this.appendNewCompressed(key, Snappy.compress(value), timeToLive) : this.appendNew(key, value, timeToLive);
+					this.appendNewCompressed(key, Snappy.compress(value), timeToLive, createdTime) : this.appendNew(key, value, timeToLive, createdTime);
 		}
 
 		if (mapEntry == null) { // no space
@@ -226,12 +222,12 @@ public class HashMapTable extends AbstractMapTable {
 		return true;
 	}
 	
-	public boolean put(byte[] key, byte[] value, long timeToLive) throws IOException {
-		return this.put(key, value, timeToLive, false);
+	public void put(byte[] key, byte[] value, long timeToLive, long createdTime) throws IOException {
+		this.put(key, value, timeToLive, createdTime, false);
 	}
 	
-	public boolean delete(byte[] key) throws IOException {
-		return this.put(key, new byte[] {0} , NO_TIMEOUT, true);
+	public void delete(byte[] key) throws IOException {
+		this.appendTombstone(key);
 	}
 	
 	public int getRealSize() {

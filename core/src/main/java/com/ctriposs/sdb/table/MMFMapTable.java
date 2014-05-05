@@ -56,7 +56,7 @@ public class MMFMapTable extends AbstractSortedMapTable {
 	}
 	
 	@Override
-	public IMapEntry appendNew(byte[] key, int keyHash, byte[] value, long timeToLive, long lastAccessedTime, boolean markDelete, boolean compressed) throws IOException {
+	public IMapEntry appendNew(byte[] key, int keyHash, byte[] value, long timeToLive, long createdTime, boolean markDelete, boolean compressed) throws IOException {
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		Preconditions.checkArgument(value != null && value.length > 0, "value is empty");
 		Preconditions.checkArgument(this.toAppendIndex.get() < MAX_ALLOWED_NUMBER_OF_ENTRIES, 
@@ -70,7 +70,7 @@ public class MMFMapTable extends AbstractSortedMapTable {
 			indexBuf.putInt(IMapEntry.INDEX_ITEM_KEY_LENGTH_OFFSET, key.length);
 			indexBuf.putInt(IMapEntry.INDEX_ITEM_VALUE_LENGTH_OFFSET, value.length);
 			indexBuf.putLong(IMapEntry.INDEX_ITEM_TIME_TO_LIVE_OFFSET, timeToLive);
-			indexBuf.putLong(IMapEntry.INDEX_ITEM_LAST_ACCESSED_TIME_OFFSET, lastAccessedTime);
+			indexBuf.putLong(IMapEntry.INDEX_ITEM_CREATED_TIME_OFFSET, createdTime);
 			indexBuf.putInt(IMapEntry.INDEX_ITEM_KEY_HASH_CODE_OFFSET, keyHash);
 			byte status = 1; // mark in use
 			if (markDelete) {

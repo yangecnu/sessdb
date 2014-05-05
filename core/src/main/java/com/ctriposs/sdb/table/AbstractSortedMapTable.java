@@ -181,8 +181,9 @@ public abstract class AbstractSortedMapTable extends AbstractMapTable {
 				return result;
 			}
 			// hint for locality
-			result.setImmutable(true);
+			result.setLevel(this.getLevel());
 			result.setTimeToLive(mapEntry.getTimeToLive());
+			result.setCreatedTime(mapEntry.getCreatedTime());
 			
 			return result;
 		}

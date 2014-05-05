@@ -182,7 +182,7 @@ public class SDB implements Closeable {
 	 * @param value the map entry value
 	 */
 	public void put(byte[] key, byte[] value) {
-		this.put(key, value, AbstractMapTable.NO_TIMEOUT, false);
+		this.put(key, value, AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis(), false);
 	}
 	
 	/**
@@ -193,7 +193,7 @@ public class SDB implements Closeable {
 	 * @param timeToLive time to live
 	 */
 	public void put(byte[] key, byte[] value, long timeToLive) {
-		this.put(key, value, timeToLive, false);
+		this.put(key, value, timeToLive, System.currentTimeMillis(), false);
 	}
 	
 	/**
@@ -202,7 +202,7 @@ public class SDB implements Closeable {
 	 * @param key the map entry key
 	 */
 	public void delete(byte[] key) {
-		this.put(key, new byte[] {0}, AbstractMapTable.NO_TIMEOUT, true);
+		this.put(key, new byte[] {0}, AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis(), true);
 	}
 	
 	private short getShart(byte[] key) {
@@ -211,14 +211,14 @@ public class SDB implements Closeable {
 		return (short) (keyHash % this.config.getShardNumber());
 	}
 	
-	private void put(byte[] key, byte[] value, long timeToLive, boolean isDelete) {
+	private void put(byte[] key, byte[] value, long timeToLive, long createdTime, boolean isDelete) {
 		try {
 			short shard = this.getShart(key);
-			boolean success = this.activeInMemTables[shard].put(key, value, timeToLive, isDelete);
+			boolean success = this.activeInMemTables[shard].put(key, value, timeToLive, createdTime, isDelete);
 			
 			if (!success) { // overflow
 				synchronized(activeInMemTableCreationLocks[shard]) {
-					success = this.activeInMemTables[shard].put(key, value, timeToLive, isDelete); // other thread may have done the creation work
+					success = this.activeInMemTables[shard].put(key, value, timeToLive, createdTime, isDelete); // other thread may have done the creation work
 					if (!success) { // move to level queue 0
 						this.activeInMemTables[shard].markImmutable(true);
 						LevelQueue lq0 = this.levelQueueLists[shard].get(LEVEL0);
@@ -233,7 +233,7 @@ public class SDB implements Closeable {
 						HashMapTable tempTable = new HashMapTable(dir, shard, LEVEL0, System.nanoTime());
 						tempTable.markUsable(true);
 						tempTable.markImmutable(false); //mutable
-						tempTable.put(key, value, timeToLive, isDelete);
+						tempTable.put(key, value, timeToLive, createdTime, isDelete);
 						// switch on
 						this.activeInMemTables[shard] = tempTable;
 					}
@@ -248,7 +248,7 @@ public class SDB implements Closeable {
 	}
 	
 	/**
-	 * Get value in the cache with specific key
+	 * Get value in the DB with specific key
 	 * 
 	 * @param key map entry key
 	 * @return non-null value if the entry exists, not deleted or expired.
@@ -257,7 +257,7 @@ public class SDB implements Closeable {
 	public byte[] get(byte[] key) {
 		try {
 			short shard = this.getShart(key);
-			// check active memory mapped table first
+			// check active hashmap table first
 			GetResult result = this.activeInMemTables[shard].get(key);
 			if (result.isFound()) {
 				if (!result.isDeleted() && !result.isExpired()) {
@@ -266,7 +266,7 @@ public class SDB implements Closeable {
 					return null; // deleted or expired
 				}
 			} else {
-				// check level0 memory mapped tables
+				// check level0 hashmap tables
 				LevelQueue lq0 = levelQueueLists[shard].get(LEVEL0);
 				lq0.getReadLock().lock();
 				try {
@@ -282,8 +282,8 @@ public class SDB implements Closeable {
 				
 				if (result.isFound()) {
 					if (!result.isDeleted() && !result.isExpired()) {
-						if (result.isImmutable()) { // keep locality
-							this.put(key, result.getValue(), result.getTimeToLive());
+						if (result.getLevel() == SDB.LEVEL2 && this.config.isLocalityEnabled()) { // keep locality
+							this.put(key, result.getValue(), result.getTimeToLive(), result.getCreatedTime(), false);
 						}
 						return result.getValue();
 					} else {
@@ -312,8 +312,8 @@ public class SDB implements Closeable {
 				
 				if (result.isFound()) {
 					if (!result.isDeleted() && !result.isExpired()) {
-						if (result.isImmutable()) { // keep locality
-							this.put(key, result.getValue(), result.getTimeToLive());
+						if (result.getLevel() == SDB.LEVEL2 && this.config.isLocalityEnabled()) { // keep locality
+							this.put(key, result.getValue(), result.getTimeToLive(), result.getCreatedTime(), false);
 						}
 						return result.getValue();
 					} else {
@@ -362,7 +362,7 @@ public class SDB implements Closeable {
 		}
 		
 		closed = true;
-		log.info("Cache Closed.");
+		log.info("DB Closed.");
 	}
 	
 	/**

@@ -51,7 +51,7 @@ public class Level0MergerTest {
 		HashMapTable table3 = sourceTables[2];
 		start = 1;
 		while(start < max) {
-			table3.put(String.valueOf(start).getBytes(), String.valueOf(start).getBytes(), 200);
+			table3.put(String.valueOf(start).getBytes(), String.valueOf(start).getBytes(), 200, System.currentTimeMillis());
 			start = start + 4;
 		}
 		
@@ -66,7 +66,7 @@ public class Level0MergerTest {
 		HashMapTable table2 = sourceTables[1];
 		start = 2;
 		while(start < max) {
-			table2.put(String.valueOf(start).getBytes(), String.valueOf(start).getBytes(), 60 * 1000);
+			table2.put(String.valueOf(start).getBytes(), String.valueOf(start).getBytes(), 60 * 1000, System.currentTimeMillis());
 			start = start + 4;
 		}
 		
@@ -74,7 +74,7 @@ public class Level0MergerTest {
 		HashMapTable table1 = sourceTables[0];
 		start = 0;
 		while(start < max) {
-			table1.put(String.valueOf(start).getBytes(), String.valueOf(start).getBytes(), 120 * 1000);
+			table1.put(String.valueOf(start).getBytes(), String.valueOf(start).getBytes(), 120 * 1000, System.currentTimeMillis());
 			start = start + 1;
 		}
 		
@@ -156,6 +156,7 @@ public class Level0MergerTest {
 				assertTrue(Arrays.equals(new byte[] {0}, mapEntry.getValue()));
 			else {
 				assertTrue(new String(Snappy.uncompress(mapEntry.getValue())).equals(keyList.get(i)));
+				//assertTrue(new String(mapEntry.getValue()).equals(keyList.get(i)));
 			}
 		}
 		
@@ -189,7 +190,7 @@ public class Level0MergerTest {
 		for(int i = 0; i < 4; i++) {
 			int start = i;
 			HashMapTable table = sourceTables[i];
-			while(table.put(String.valueOf(start).getBytes(), value.getBytes(), AbstractMapTable.NO_TIMEOUT)) {
+			while(table.put(String.valueOf(start).getBytes(), value.getBytes(), AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis(), false)) {
 				totalCount++;
 				if (start > max) max = start;
 				start = start + 4;

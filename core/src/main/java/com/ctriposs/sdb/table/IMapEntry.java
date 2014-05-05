@@ -8,7 +8,7 @@ public interface IMapEntry {
 	final static int INDEX_ITEM_KEY_LENGTH_OFFSET = 8;
 	final static int INDEX_ITEM_VALUE_LENGTH_OFFSET = 12;
 	final static int INDEX_ITEM_TIME_TO_LIVE_OFFSET = 16;
-	final static int INDEX_ITEM_LAST_ACCESSED_TIME_OFFSET = 24;
+	final static int INDEX_ITEM_CREATED_TIME_OFFSET = 24;
 	final static int INDEX_ITEM_KEY_HASH_CODE_OFFSET = 32;
 	final static int INDEX_ITEM_STATUS = 36;
 	
@@ -22,9 +22,7 @@ public interface IMapEntry {
 	
 	long getTimeToLive() throws IOException;
 	
-	long getLastAccessedTime() throws IOException;
-	
-	void setLastAccessedTime(long lastAccessedTime) throws IOException;
+	long getCreatedTime() throws IOException;
 
 	boolean isDeleted() throws IOException;
 	

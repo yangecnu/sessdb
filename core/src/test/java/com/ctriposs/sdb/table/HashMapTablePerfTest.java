@@ -50,7 +50,7 @@ public class HashMapTablePerfTest {
 			value.ee = i;
 			value.gg = i;
 			value.ii = i;
-			map.put(users(user, i).getBytes(), value.toBytes(), AbstractMapTable.NO_TIMEOUT);
+			map.put(users(user, i).getBytes(), value.toBytes(), AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis());
 		}
 		assertTrue(map.getAppendedSize() == count);
 		for(int i = 0; i < count; i++) {
@@ -102,7 +102,7 @@ public class HashMapTablePerfTest {
 	                        value.ee = i;
 	                        value.gg = i;
 	                        value.ii = i;
-	                        map.put(users(user, i).getBytes(), value.toBytes(), AbstractMapTable.NO_TIMEOUT);
+	                        map.put(users(user, i).getBytes(), value.toBytes(), AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis());
 	                    }
 	                    for (int i = finalT; i < COUNT; i += N_THREADS) {
 	            			GetResult result = map.get(users(user, i).getBytes());
