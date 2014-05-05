@@ -1,0 +1,29 @@
+allprojects {
+	repositories {
+		mavenCentral()
+	}
+}
+
+apply from: file('gradle/versioning.gradle')
+apply from: file('gradle/convention.gradle')
+
+subprojects {
+	group = "com.ctriposs.sdb"
+
+    dependencies {
+        testCompile 'junit:junit:4.11'
+		testCompile 'org.slf4j:slf4j-simple:1.7.5'
+    }
+}
+
+project(':core') {
+	
+	archivesBaseName = 'sessdb'
+	
+    dependencies {
+		compile 'com.google.guava:guava:16.0.1'
+		compile 'org.xerial.snappy:snappy-java:1.0.4.1'
+        compile 'org.slf4j:slf4j-api:1.7.5'
+    }
+}
+

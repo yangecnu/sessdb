@@ -4,3 +4,5 @@
 /.gradle
 /build
 /.settings
+/testDir
+/target

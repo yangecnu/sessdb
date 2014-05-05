@@ -1,0 +1,38 @@
+subprojects { project ->
+	apply plugin: 'java' // Plugin as major conventions
+
+	sourceCompatibility = 1.6
+
+	
+	task sourcesJar(type: Jar, dependsOn:classes) {
+		from sourceSets.main.allSource
+		classifier 'sources'
+		extension 'jar'
+	}
+
+	task javadocJar(type: Jar, dependsOn:javadoc) {
+		from javadoc.destinationDir
+		classifier 'javadoc'
+		extension 'jar'
+	}
+	
+	artifacts {
+		archives sourcesJar
+		archives javadocJar
+	}
+	
+	apply plugin: 'maven'
+	
+	uploadArchives {
+		repositories.mavenDeployer {
+			repository(url: mavenRepoUrl) {
+				authentication(userName: mavenRepoUser, password: mavenRepoPassword)
+			}
+		}
+	}
+}
+
+// Generate wrapper, which is distributed as part of source to alleviate the need of installing gradle
+task createWrapper(type: Wrapper) {
+	gradleVersion = '1.11'
+}
