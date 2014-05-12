@@ -19,20 +19,20 @@ import com.google.common.base.Preconditions;
 
 /**
  * In memory hashmap backed by memory mapped WAL(Write Ahead Log)
- * 
+ *
  * @author bulldog
  *
  */
 public class HashMapTable extends AbstractMapTable {
-	
+
 	private AtomicBoolean immutable = new AtomicBoolean(true);
 
 	private ConcurrentHashMap<ByteArrayWrapper, InMemIndex> hashMap;
 	protected MappedByteBuffer dataMappedByteBuffer;
 	protected MappedByteBuffer indexMappedByteBuffer;
-	
+
 	private boolean compressionEnabled = true;
-	
+
 	// Create new
 	public HashMapTable(String dir, int level, long createdTime)
 			throws IOException {
@@ -40,14 +40,14 @@ public class HashMapTable extends AbstractMapTable {
 		mapIndexAndDataFiles();
 		initToAppendIndexAndOffset();
 	}
-	
+
 	public HashMapTable(String dir, short shard, int level, long createdTime)
 			throws IOException {
 		super(dir, shard, level, createdTime);
 		mapIndexAndDataFiles();
 		initToAppendIndexAndOffset();
 	}
-	
+
 	// Load existing
 	public HashMapTable(String dir, String fileName)
 			throws IOException {
@@ -55,20 +55,21 @@ public class HashMapTable extends AbstractMapTable {
 		mapIndexAndDataFiles();
 		initToAppendIndexAndOffset();
 	}
-	
+
 	public void setCompressionEnabled(boolean enabled) {
 		this.compressionEnabled = enabled;
 	}
-	
+
 	private void mapIndexAndDataFiles() throws IOException {
 		indexMappedByteBuffer = this.indexChannel.map(MapMode.READ_WRITE, 0, this.indexChannel.size());
 		dataMappedByteBuffer = this.dataChannel.map(MapMode.READ_WRITE, 0, this.dataChannel.size());
 	}
-	
+
 	public Set<Map.Entry<ByteArrayWrapper, InMemIndex>> getEntrySet() {
+		ensureNotClosed();
 		return this.hashMap.entrySet();
 	}
-	
+
 	private void initToAppendIndexAndOffset() throws IOException {
 		this.hashMap = new ConcurrentHashMap<ByteArrayWrapper, InMemIndex>(INIT_INDEX_ITEMS_PER_TABLE);
 		toAppendIndex = new AtomicInteger(0);
@@ -85,29 +86,30 @@ public class HashMapTable extends AbstractMapTable {
 			mapEntry = new MMFMapEntryImpl(index, this.indexMappedByteBuffer, this.dataMappedByteBuffer);
 		}
 	}
-	
+
 	// for testing
 	public IMapEntry appendNew(byte[] key, byte[] value, long timeToLive, long createdTime) throws IOException {
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		Preconditions.checkArgument(value != null && value.length > 0, "value is empty");
 		return this.appendNew(key, Arrays.hashCode(key), value, timeToLive, createdTime, false, false);
 	}
-	
+
 	private IMapEntry appendTombstone(byte[] key) throws IOException {
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		return this.appendNew(key, Arrays.hashCode(key), new byte[] {0}, NO_TIMEOUT, System.currentTimeMillis(), true, false);
 	}
-	
+
 	private IMapEntry appendNewCompressed(byte[] key, byte[] value, long timeToLive, long createdTime) throws IOException {
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		Preconditions.checkArgument(value != null && value.length > 0, "value is empty");
 		return this.appendNew(key, Arrays.hashCode(key), value, timeToLive, createdTime, false, true);
 	}
-	
+
 	private IMapEntry appendNew(byte[] key, int keyHash, byte[] value, long timeToLive, long createdTime, boolean markDelete, boolean compressed) throws IOException {
+		ensureNotClosed();
 		appendLock.lock();
 		try {
-			
+
 			if (toAppendIndex.get() == INIT_INDEX_ITEMS_PER_TABLE) { // index overflow
 				return null;
 			}
@@ -115,7 +117,7 @@ public class HashMapTable extends AbstractMapTable {
 			if (toAppendDataFileOffset.get() + dataLength > INIT_DATA_FILE_SIZE) { // data overflow
 				return null;
 			}
-			
+
 			// write index metadata
 			indexBuf.clear();
 			indexBuf.putLong(IMapEntry.INDEX_ITEM_IN_DATA_FILE_OFFSET_OFFSET, toAppendDataFileOffset.get());
@@ -132,25 +134,25 @@ public class HashMapTable extends AbstractMapTable {
 				status = (byte) (status + 4);
 			}
 			indexBuf.put(IMapEntry.INDEX_ITEM_STATUS, status); // mark in use
-			
+
 			int offsetInIndexFile = INDEX_ITEM_LENGTH * toAppendIndex.get();
 			this.indexMappedByteBuffer.position(offsetInIndexFile);
 			//indexBuf.rewind();
 			this.indexMappedByteBuffer.put(indexBuf);
-			
+
 			// write key/value
 			this.dataMappedByteBuffer.position((int)toAppendDataFileOffset.get());
 			this.dataMappedByteBuffer.put(ByteBuffer.wrap(key));
 			this.dataMappedByteBuffer.position((int)toAppendDataFileOffset.get() + key.length);
 			this.dataMappedByteBuffer.put(ByteBuffer.wrap(value));
-			
+
 			int appendedIndex = toAppendIndex.get();
 			this.hashMap.put(new ByteArrayWrapper(key), new InMemIndex(appendedIndex));
-			
+
 			// commit/update offset & index
 			toAppendDataFileOffset.addAndGet(dataLength);
 			toAppendIndex.incrementAndGet();
-			
+
 			return new MMFMapEntryImpl(appendedIndex, this.indexMappedByteBuffer, this.dataMappedByteBuffer);
 		}
 		finally {
@@ -160,13 +162,15 @@ public class HashMapTable extends AbstractMapTable {
 
 	@Override
 	public IMapEntry getMapEntry(int index) {
+		ensureNotClosed();
 		Preconditions.checkArgument(index >= 0, "index (%s) must be equal to or greater than 0", index);
 		Preconditions.checkArgument(!isEmpty(), "Can't get map entry since the map is empty");
 		return new MMFMapEntryImpl(index, this.indexMappedByteBuffer, this.dataMappedByteBuffer);
 	}
-	
+
 	@Override
 	public GetResult get(byte[] key) throws IOException {
+		ensureNotClosed();
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		GetResult result = new GetResult();
 		InMemIndex inMemIndex = this.hashMap.get(new ByteArrayWrapper(key));
@@ -189,55 +193,58 @@ public class HashMapTable extends AbstractMapTable {
 			result.setLevel(this.getLevel());
 			result.setTimeToLive(mapEntry.getTimeToLive());
 			result.setCreatedTime(mapEntry.getCreatedTime());
-			
+
 			return result;
 		}
 	}
-	
+
 	public void markImmutable(boolean immutable) {
-		this.immutable.set(immutable);	
+		this.immutable.set(immutable);
 	}
-	
+
 	public boolean isImmutable() {
 		return this.immutable.get();
 	}
 
 	public boolean put(byte[] key, byte[] value, long timeToLive, long createdTime, boolean isDelete) throws IOException {
+		ensureNotClosed();
 		Preconditions.checkArgument(key != null && key.length > 0, "Key is empty");
 		Preconditions.checkArgument(value != null && value.length > 0, "value is empty");
-		
+
 		IMapEntry mapEntry = null;
 		if (isDelete) {
 			// make a tombstone
 			mapEntry = this.appendTombstone(key);
 		} else {
-			mapEntry = this.compressionEnabled ? 
+			mapEntry = this.compressionEnabled ?
 					this.appendNewCompressed(key, Snappy.compress(value), timeToLive, createdTime) : this.appendNew(key, value, timeToLive, createdTime);
 		}
 
 		if (mapEntry == null) { // no space
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	public void put(byte[] key, byte[] value, long timeToLive, long createdTime) throws IOException {
 		this.put(key, value, timeToLive, createdTime, false);
 	}
-	
+
 	public void delete(byte[] key) throws IOException {
 		this.appendTombstone(key);
 	}
-	
+
 	public int getRealSize() {
 		return this.hashMap.size();
-	}
-	
+}
+
 	@Override
 	public void close() throws IOException {
 		MMFUtil.unmap(indexMappedByteBuffer);
+		indexMappedByteBuffer = null;
 		MMFUtil.unmap(dataMappedByteBuffer);
+		dataMappedByteBuffer = null;
 		super.close();
 	}
 }

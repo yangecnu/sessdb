@@ -24,14 +24,14 @@ import com.google.common.base.Preconditions;
 
 /**
  * A Big, Fast, Persistent K/V Store, Tailored for Session Data
- * 
+ *
  * @author bulldog
  *
  */
 public class SDB implements Closeable {
-	
+
 	static final Logger log = LoggerFactory.getLogger(SDB.class);
-	
+
 	public static final int LEVEL0 = 0;
 	public static final int LEVEL1 = 1;
 	public static final int LEVEL2 = 2;
@@ -39,31 +39,31 @@ public class SDB implements Closeable {
 	private volatile HashMapTable[] activeInMemTables;
 	private Object[] activeInMemTableCreationLocks;
 	private List<LevelQueue>[] levelQueueLists;
-	
+
 	private String dir;
 	private Config config;
 	private Level0Merger[] level0Mergers;
 	private Level1Merger[] level1Mergers;
 	private CountDownLatch[] countDownLatches;
-	
+
 	private boolean closed = false;
-	
+
 	public SDB(String dir) {
 		this(dir, new Config());
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public SDB(String dir, Config config) {
 		this.dir = dir;
 		this.config = config;
-		
+
 		activeInMemTables = new HashMapTable[config.getShardNumber()];
-		
+
 		activeInMemTableCreationLocks = new Object[config.getShardNumber()];
 		for(int i = 0; i < config.getShardNumber(); i++) {
 			activeInMemTableCreationLocks[i] = new Object();
 		}
-		
+
 		// initialize level queue list
 		levelQueueLists = new ArrayList[config.getShardNumber()];
 		for(int i = 0; i < config.getShardNumber(); i++) {
@@ -72,16 +72,16 @@ public class SDB implements Closeable {
 				levelQueueLists[i].add(new LevelQueue());
 			}
 		}
-		
+
 		try {
 			this.loadMapTables();
 		} catch (Exception ex) {
 			throw new RuntimeException("Fail to load on disk map tables!", ex);
 		}
-		
+
 		this.startLevelMergers();
 	}
-	
+
 	private void startLevelMergers() {
 		countDownLatches = new CountDownLatch[this.config.getShardNumber()];
 		for(int i = 0; i < this.config.getShardNumber(); i++) {
@@ -89,7 +89,7 @@ public class SDB implements Closeable {
 		}
 		level0Mergers = new Level0Merger[config.getShardNumber()];
 		level1Mergers = new Level1Merger[config.getShardNumber()];
-		
+
 		for(short i = 0; i < this.config.getShardNumber(); i++) {
 			level0Mergers[i] = new Level0Merger(this, this.levelQueueLists[i], countDownLatches[i], i);
 			level0Mergers[i].start();
@@ -97,7 +97,7 @@ public class SDB implements Closeable {
 			level1Mergers[i].start();
 		}
 	}
-	
+
 	private void loadMapTables() throws IOException, ClassNotFoundException {
 		File dirFile = new File(dir);
 		if (!dirFile.exists())  {
@@ -110,9 +110,9 @@ public class SDB implements Closeable {
 				if (filename.endsWith(AbstractMapTable.INDEX_FILE_SUFFIX)) return true;
 				return false;
 			}
-			
+
 		});
-		
+
 		// new DB, setup new active map table
 		if (fileNames == null || fileNames.length == 0) {
 			for(short i = 0; i < this.config.getShardNumber(); i++) {
@@ -123,7 +123,7 @@ public class SDB implements Closeable {
 			}
 			return;
 		}
-		
+
 		PriorityQueue<AbstractMapTable> pq = new PriorityQueue<AbstractMapTable>();
 		for(String fileName : fileNames) {
 			int dotIndex = fileName.lastIndexOf(".");
@@ -141,9 +141,9 @@ public class SDB implements Closeable {
 				pq.add(new FCMapTable(dir, fileName));
 			}
 		}
-		
+
 		Preconditions.checkArgument(pq.size() > 0, "on-disk table file names corrupted!");
-		
+
 		// setup active map table
 		for(int i = 0; i < this.config.getShardNumber(); i++) {
 			AbstractMapTable table = pq.poll();
@@ -153,7 +153,7 @@ public class SDB implements Closeable {
 			this.activeInMemTables[table.getShard()].markImmutable(false); // mutable
 			this.activeInMemTables[table.getShard()].setCompressionEnabled(this.config.isCompressionEnabled());
 		}
-		
+
 		while(!pq.isEmpty()) {
 			AbstractMapTable table = pq.poll();
 			if (table.isUsable()) {
@@ -166,28 +166,28 @@ public class SDB implements Closeable {
 			}
 		}
 	}
-	
+
 	public String getDir() {
 		return this.dir;
 	}
-	
-	public Config getConfig() { 
+
+	public Config getConfig() {
 		return this.config;
 	}
-	
+
 	/**
 	 * Put key/value entry into the DB with no timeout
-	 * 
+	 *
 	 * @param key the map entry key
 	 * @param value the map entry value
 	 */
 	public void put(byte[] key, byte[] value) {
 		this.put(key, value, AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis(), false);
 	}
-	
+
 	/**
 	 * Put key/value entry into the DB with specific timeToLive
-	 * 
+	 *
 	 * @param key the map entry key
 	 * @param value the map entry value
 	 * @param timeToLive time to live
@@ -195,40 +195,41 @@ public class SDB implements Closeable {
 	public void put(byte[] key, byte[] value, long timeToLive) {
 		this.put(key, value, timeToLive, System.currentTimeMillis(), false);
 	}
-	
+
 	/**
 	 * Delete map entry in the DB with specific key
-	 * 
+	 *
 	 * @param key the map entry key
 	 */
 	public void delete(byte[] key) {
 		this.put(key, new byte[] {0}, AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis(), true);
 	}
-	
+
 	private short getShart(byte[] key) {
 		int keyHash = Arrays.hashCode(key);
 		keyHash = Math.abs(keyHash);
 		return (short) (keyHash % this.config.getShardNumber());
 	}
-	
+
 	private void put(byte[] key, byte[] value, long timeToLive, long createdTime, boolean isDelete) {
+		ensureNotClosed();
 		try {
 			short shard = this.getShart(key);
 			boolean success = this.activeInMemTables[shard].put(key, value, timeToLive, createdTime, isDelete);
-			
+
 			if (!success) { // overflow
 				synchronized(activeInMemTableCreationLocks[shard]) {
 					success = this.activeInMemTables[shard].put(key, value, timeToLive, createdTime, isDelete); // other thread may have done the creation work
 					if (!success) { // move to level queue 0
 						this.activeInMemTables[shard].markImmutable(true);
 						LevelQueue lq0 = this.levelQueueLists[shard].get(LEVEL0);
-						lq0.getWriteLock().lock(); 
+						lq0.getWriteLock().lock();
 						try {
 							lq0.addFirst(this.activeInMemTables[shard]);
 						} finally {
 							lq0.getWriteLock().unlock();
 						}
-						
+
 						@SuppressWarnings("resource")
 						HashMapTable tempTable = new HashMapTable(dir, shard, LEVEL0, System.nanoTime());
 						tempTable.markUsable(true);
@@ -246,15 +247,16 @@ public class SDB implements Closeable {
 			throw new RuntimeException("Fail to put key & value, IOException occurr", ioe);
 		}
 	}
-	
+
 	/**
 	 * Get value in the DB with specific key
-	 * 
+	 *
 	 * @param key map entry key
 	 * @return non-null value if the entry exists, not deleted or expired.
 	 * null value if the entry does not exist, or exists but deleted or expired.
 	 */
 	public byte[] get(byte[] key) {
+		ensureNotClosed();
 		try {
 			short shard = this.getShart(key);
 			// check active hashmap table first
@@ -279,7 +281,7 @@ public class SDB implements Closeable {
 				} finally {
 					lq0.getReadLock().unlock();
 				}
-				
+
 				if (result.isFound()) {
 					if (!result.isDeleted() && !result.isExpired()) {
 						if (result.getLevel() == SDB.LEVEL2 && this.config.isLocalityEnabled()) { // keep locality
@@ -290,8 +292,8 @@ public class SDB implements Closeable {
 						return null; // deleted or expired
 					}
 				}
-				
-				
+
+
 				// check level 1-2 on disk sorted tables
 				searchLevel12: {
 					for(int level = 1; level <= MAX_LEVEL; level++) {
@@ -309,7 +311,7 @@ public class SDB implements Closeable {
 						}
 					}
 				}
-				
+
 				if (result.isFound()) {
 					if (!result.isDeleted() && !result.isExpired()) {
 						if (result.getLevel() == SDB.LEVEL2 && this.config.isLocalityEnabled()) { // keep locality
@@ -325,7 +327,7 @@ public class SDB implements Closeable {
 		catch(IOException ioe) {
 			throw new RuntimeException("Fail to get value by key, IOException occurr", ioe);
 		}
-		
+
 		return null; // no luck
 	}
 
@@ -335,12 +337,12 @@ public class SDB implements Closeable {
 		for(int i = 0; i < config.getShardNumber(); i++) {
 			this.activeInMemTables[i].close();
 		}
-		
+
 		for(int i = 0; i < config.getShardNumber(); i++) {
 			this.level0Mergers[i].setStop();
 			this.level1Mergers[i].setStop();
 		}
-		
+
 		for(int i = 0; i < config.getShardNumber(); i++) {
 			try {
 				log.info("Shard " + i + " waiting level 0 & 1 merge threads to exit...");
@@ -348,43 +350,48 @@ public class SDB implements Closeable {
 			} catch (InterruptedException e) {
 				// ignore;
 			}
-		
+
 		}
-		
+
 		for(int i = 0; i < config.getShardNumber(); i++) {
 			for(int j = 0; j <= MAX_LEVEL; j++) {
 				LevelQueue lq = this.levelQueueLists[i].get(j);
 				for(AbstractMapTable table : lq) {
 					table.close();
 				}
-				
+
 			}
 		}
-		
+
 		closed = true;
 		log.info("DB Closed.");
 	}
-	
+
 	/**
 	 * Delete all back files;
-	 * 
+	 *
 	 */
 	public void destory() {
 		Preconditions.checkArgument(closed, "Can't delete DB in open status, please close first.");
-		
+
 		for(int i = 0; i < config.getShardNumber(); i++) {
 			this.activeInMemTables[i].delete();
 		}
-		
+
 		for(int i = 0; i < config.getShardNumber(); i++) {
 			for(int j = 0; j <= MAX_LEVEL; j++) {
 				LevelQueue lq = this.levelQueueLists[i].get(j);
 				for(AbstractMapTable table : lq) {
 					table.delete();
 				}
-				
+
 			}
 		}
 	}
 
+	protected void ensureNotClosed() {
+		if (closed) {
+			throw new IllegalStateException("You can't work on a closed SDB.");
+		}
+	}
 }
