@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.CountDownLatch;
 
+import com.ctriposs.sdb.stats.FileStatsCollector;
+import com.ctriposs.sdb.stats.Operations;
+import com.ctriposs.sdb.stats.SDBStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +35,7 @@ public class SDB implements Closeable {
 
 	static final Logger log = LoggerFactory.getLogger(SDB.class);
 
+	public static final int INMEM_LEVEL = -1;
 	public static final int LEVEL0 = 0;
 	public static final int LEVEL1 = 1;
 	public static final int LEVEL2 = 2;
@@ -39,12 +43,14 @@ public class SDB implements Closeable {
 	private volatile HashMapTable[] activeInMemTables;
 	private Object[] activeInMemTableCreationLocks;
 	private List<LevelQueue>[] levelQueueLists;
+	private final SDBStats stats = new SDBStats();
 
 	private String dir;
 	private Config config;
 	private Level0Merger[] level0Mergers;
 	private Level1Merger[] level1Mergers;
 	private CountDownLatch[] countDownLatches;
+	private FileStatsCollector fileStatsCollector;
 
 	private boolean closed = false;
 
@@ -79,6 +85,9 @@ public class SDB implements Closeable {
 			throw new RuntimeException("Fail to load on disk map tables!", ex);
 		}
 
+		this.fileStatsCollector = new FileStatsCollector(stats, levelQueueLists);
+		this.fileStatsCollector.start();
+
 		this.startLevelMergers();
 	}
 
@@ -91,9 +100,9 @@ public class SDB implements Closeable {
 		level1Mergers = new Level1Merger[config.getShardNumber()];
 
 		for(short i = 0; i < this.config.getShardNumber(); i++) {
-			level0Mergers[i] = new Level0Merger(this, this.levelQueueLists[i], countDownLatches[i], i);
+			level0Mergers[i] = new Level0Merger(this, this.levelQueueLists[i], countDownLatches[i], i, stats);
 			level0Mergers[i].start();
-			level1Mergers[i] = new Level1Merger(this, this.levelQueueLists[i], countDownLatches[i], i);
+			level1Mergers[i] = new Level1Merger(this, this.levelQueueLists[i], countDownLatches[i], i, stats);
 			level1Mergers[i].start();
 		}
 	}
@@ -171,8 +180,10 @@ public class SDB implements Closeable {
 		return this.dir;
 	}
 
-	public Config getConfig() {
-		return this.config;
+	public Config getConfig() { return this.config; }
+
+	public SDBStats getStats() {
+		return this.stats;
 	}
 
 	/**
@@ -213,6 +224,8 @@ public class SDB implements Closeable {
 
 	private void put(byte[] key, byte[] value, long timeToLive, long createdTime, boolean isDelete) {
 		ensureNotClosed();
+		long start = System.currentTimeMillis();
+		String operation = isDelete ? Operations.DELETE : Operations.PUT;
 		try {
 			short shard = this.getShart(key);
 			boolean success = this.activeInMemTables[shard].put(key, value, timeToLive, createdTime, isDelete);
@@ -241,10 +254,13 @@ public class SDB implements Closeable {
 				}
 			}
 		} catch(IOException ioe) {
+			stats.recordDBError(operation);
 			if (isDelete) {
 				throw new RuntimeException("Fail to delete key, IOException occurr", ioe);
 			}
 			throw new RuntimeException("Fail to put key & value, IOException occurr", ioe);
+		} finally {
+			stats.recordDBOperation(operation, INMEM_LEVEL, System.currentTimeMillis() - start);
 		}
 	}
 
@@ -257,6 +273,8 @@ public class SDB implements Closeable {
 	 */
 	public byte[] get(byte[] key) {
 		ensureNotClosed();
+		long start = System.currentTimeMillis();
+		int reachedLevel = INMEM_LEVEL;
 		try {
 			short shard = this.getShart(key);
 			// check active hashmap table first
@@ -269,6 +287,7 @@ public class SDB implements Closeable {
 				}
 			} else {
 				// check level0 hashmap tables
+				reachedLevel = LEVEL0;
 				LevelQueue lq0 = levelQueueLists[shard].get(LEVEL0);
 				lq0.getReadLock().lock();
 				try {
@@ -293,10 +312,10 @@ public class SDB implements Closeable {
 					}
 				}
 
-
 				// check level 1-2 on disk sorted tables
 				searchLevel12: {
 					for(int level = 1; level <= MAX_LEVEL; level++) {
+						reachedLevel = level;
 						LevelQueue lq = levelQueueLists[shard].get(level);
 						lq.getReadLock().lock();
 						try {
@@ -325,7 +344,10 @@ public class SDB implements Closeable {
 			}
 		}
 		catch(IOException ioe) {
+			stats.recordDBError(Operations.GET);
 			throw new RuntimeException("Fail to get value by key, IOException occurr", ioe);
+		} finally {
+			stats.recordDBOperation(Operations.GET, reachedLevel, System.currentTimeMillis() - start);
 		}
 
 		return null; // no luck
@@ -334,6 +356,9 @@ public class SDB implements Closeable {
 	@Override
 	public void close() throws IOException {
 		if (closed) return;
+
+		fileStatsCollector.setStop();
+
 		for(int i = 0; i < config.getShardNumber(); i++) {
 			this.activeInMemTables[i].close();
 		}
