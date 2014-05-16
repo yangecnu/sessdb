@@ -224,7 +224,7 @@ public class SDB implements Closeable {
 
 	private void put(byte[] key, byte[] value, long timeToLive, long createdTime, boolean isDelete) {
 		ensureNotClosed();
-		long start = System.currentTimeMillis();
+		long start = System.nanoTime();
 		String operation = isDelete ? Operations.DELETE : Operations.PUT;
 		try {
 			short shard = this.getShart(key);
@@ -260,7 +260,7 @@ public class SDB implements Closeable {
 			}
 			throw new RuntimeException("Fail to put key & value, IOException occurr", ioe);
 		} finally {
-			stats.recordDBOperation(operation, INMEM_LEVEL, System.currentTimeMillis() - start);
+			stats.recordDBOperation(operation, INMEM_LEVEL, System.nanoTime() - start);
 		}
 	}
 
@@ -273,7 +273,7 @@ public class SDB implements Closeable {
 	 */
 	public byte[] get(byte[] key) {
 		ensureNotClosed();
-		long start = System.currentTimeMillis();
+		long start = System.nanoTime();
 		int reachedLevel = INMEM_LEVEL;
 		try {
 			short shard = this.getShart(key);
@@ -347,7 +347,7 @@ public class SDB implements Closeable {
 			stats.recordDBError(Operations.GET);
 			throw new RuntimeException("Fail to get value by key, IOException occurr", ioe);
 		} finally {
-			stats.recordDBOperation(Operations.GET, reachedLevel, System.currentTimeMillis() - start);
+			stats.recordDBOperation(Operations.GET, reachedLevel, System.nanoTime() - start);
 		}
 
 		return null; // no luck

@@ -65,10 +65,10 @@ public class Level0Merger extends Thread {
 					log.info("Start running level 0 merge thread at " + DateFormatter.formatCurrentDate());
 					log.info("Current queue size at level 0 is " + levelQueue0.size());
 
-					long start = System.currentTimeMillis();
+					long start = System.nanoTime();
 					LevelQueue levelQueue1 = levelQueueList.get(SDB.LEVEL1);
 					mergeSort(levelQueue0, levelQueue1, DEFAULT_MERGE_WAYS, sdb.getDir(), shard);
-					stats.recordMerging(SDB.LEVEL0, System.currentTimeMillis() - start);
+					stats.recordMerging(SDB.LEVEL0, System.nanoTime() - start);
 
 					log.info("Stopped running level 0 merge thread at " + DateFormatter.formatCurrentDate());
 

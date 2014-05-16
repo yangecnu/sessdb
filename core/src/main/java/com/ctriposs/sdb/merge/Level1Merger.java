@@ -67,9 +67,9 @@ public class Level1Merger extends Thread {
 					log.info("Current queue size at level 1 is " + lq1.size());
 					log.info("Current queue size at level 2 is " + lq2.size());
 
-					long start = System.currentTimeMillis();
+					long start = System.nanoTime();
 					mergeSort(lq1, lq2, DEFAULT_MERGE_WAYS, sdb.getDir(), shard);
-					stats.recordMerging(SDB.LEVEL1, System.currentTimeMillis() - start);
+					stats.recordMerging(SDB.LEVEL1, System.nanoTime() - start);
 
 					merged = true;
 					log.info("End running level 1 to 2 merging at " + DateFormatter.formatCurrentDate());
