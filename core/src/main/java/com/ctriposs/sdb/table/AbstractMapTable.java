@@ -58,8 +58,6 @@ public abstract class AbstractMapTable implements Closeable, Comparable<Abstract
 	protected AtomicLong toAppendDataFileOffset;
 	protected final Lock appendLock = new ReentrantLock();
 
-	protected final ByteBuffer indexBuf = ByteBuffer.allocate(INDEX_ITEM_LENGTH);
-
 	// the level of the map store, start from 0, incremental.
 	private int level;
 	// the shard of the map store, start form 0, incremental.

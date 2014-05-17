@@ -29,6 +29,8 @@ public abstract class AbstractSortedMapTable extends AbstractMapTable {
 	public static final float FALSE_POSITIVE_PROBABILITY = 0.001F;
 	public static final int MAX_ALLOWED_NUMBER_OF_ENTRIES = Integer.MAX_VALUE / INDEX_ITEM_LENGTH;
 
+	protected final ByteBuffer indexBuf = ByteBuffer.allocate(INDEX_ITEM_LENGTH);
+
 	protected BloomFilter<byte[]> bloomFilter;
 	protected String bloomFilterFile;
 

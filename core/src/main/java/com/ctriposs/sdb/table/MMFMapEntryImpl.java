@@ -1,7 +1,7 @@
 package com.ctriposs.sdb.table;
 
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
+import java.nio.ByteBuffer;
 
 /**
  * Memory mapped file entry implementation
@@ -13,21 +13,21 @@ public class MMFMapEntryImpl implements IMapEntry {
 	
 	private int index;
 	
-	private MappedByteBuffer dataMappedByteBuffer;
-	private MappedByteBuffer indexMappedByteBuffer;
+	private ByteBuffer dataMappedByteBuffer;
+	private ByteBuffer indexMappedByteBuffer;
 	
-	public MMFMapEntryImpl(int index, MappedByteBuffer indexMappedByteBuffer, MappedByteBuffer dataMappedByteBuffer) {
+	public MMFMapEntryImpl(int index, ByteBuffer indexMappedByteBuffer, ByteBuffer dataMappedByteBuffer) {
 		this.index = index;
 		this.dataMappedByteBuffer = dataMappedByteBuffer;
 		this.indexMappedByteBuffer = indexMappedByteBuffer;
 	}
 	
-	private int getKeyLength() {
+	int getKeyLength() {
 		int offsetInIndexFile = AbstractMapTable.INDEX_ITEM_LENGTH * index + IMapEntry.INDEX_ITEM_KEY_LENGTH_OFFSET;
 		return this.indexMappedByteBuffer.getInt(offsetInIndexFile);
 	}
 	
-	private int getValueLength() {
+	int getValueLength() {
 		int offsetInIndexFile = AbstractMapTable.INDEX_ITEM_LENGTH * index + IMapEntry.INDEX_ITEM_VALUE_LENGTH_OFFSET;
 		return this.indexMappedByteBuffer.getInt(offsetInIndexFile);
 	}
