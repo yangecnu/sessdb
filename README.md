@@ -1,19 +1,19 @@
 # SessDB
 
-A Big, Fast, Persistent Key/Value Store based on a variant of LSM(Log Structured Merge Tree)
+A Big, Fast, Persistent Key/Value Store based on a variant of LSM(Log Structured Merge Tree).
 
 ## Feature Highlight:
-1. **High Read/Write Performance**: write performance closes to O(1) direct memory access, worst average read performance closes to O(1) disk acess, tailored for session data access, also suitable for caching data.
+1. **High Read/Write Performance**: write performance close to O(1) direct memory access, worst average read performance close to O(1) disk acess, tailored for session data scenarios, also suitable for caching data scenarios.
 2. **Persistence**: all data is persisted in disk file, no data eviction issue as Memcached, suitable for session data scenarios.
-3. **Big**: can store data bigger than memory.
-4. **Effective Memory Usage**: uses only a small amount of heap memory, leverages a hierarchical storage mechanism, only most recently inserted fresh data resides in heap memory, a big amount of less fresh data resides in memory mapped file, a huge amout of old data resides in disk file; hierarchical sotarge ensures high read/write performance, while heap GC has no big performance impact.
+3. **Big**: can store data size bigger than memory.
+4. **Effective Memory Usage**: uses only a small amount of heap memory, leverages a hierarchical storage mechanism, only most recently inserted fresh data resides in heap memory, a big amount of less fresh data resides in memory mapped file, a huge amout of old data resides in disk file; hierarchical sotarge ensure high read/write performance, while heap GC has no big performance impact.
 5. **Thread Safe**: supporting multi-threads concurrent and non-blocking access.
-6. **Crash Resistance**: all data is durable, process crashes or dies, all data can be quickly restored by restarting the machine or process.
+6. **Crash Resistance**: all data is durable, process crashes or dies, all data can be quickly restored by just restarting the machine or process.
 7. **Compaction**: automatic expired and deleted data cleanup, avoiding disk and memory space waste.
 8. **Light in Design & Implementation**: simple interface similar to Map, only supports Get/Put/Delete operations, cross platform Java based, small codebase size, embeddable.
 
 ## Performance Highlight:
-On normal PC, suppose 10 bytes key and 100 bytes value, randome read can be **> 500,000** ops/sec, random write can be **> 200,000** ops/sec, performance will be better on server grade machine.
+On normal PC, suppose 10 bytes key and 100 bytes value, random read can be **> 500,000** ops/sec, random write can be **> 200,000** ops/sec, performance will be better on server grade machine.
 
 
 ## The Architecture
