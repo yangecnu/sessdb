@@ -42,24 +42,24 @@
         <h1>
 <a name="sessdb" class="anchor" href="#sessdb"><span class="octicon octicon-link"></span></a>SessDB</h1>
 
-<p>A Big, Fast, Persistent Key/Value Store based on a variant of LSM(Log Structured Merge Tree)</p>
+<p>A Big, Fast, Persistent Key/Value Store based on a variant of LSM(Log Structured Merge Tree).</p>
 
 <h2>
 <a name="feature-highlight" class="anchor" href="#feature-highlight"><span class="octicon octicon-link"></span></a>Feature Highlight:</h2>
 
 <ol>
 <li>
-<strong>High Read/Write Performance</strong>: write performance closes to O(1) direct memory access, worst average read performance closes to O(1) disk acess, tailored for session data access, also suitable for caching data.</li>
+<strong>High Read/Write Performance</strong>: write performance close to O(1) direct memory access, worst average read performance close to O(1) disk acess, tailored for session data scenarios, also suitable for caching data scenarios.</li>
 <li>
 <strong>Persistence</strong>: all data is persisted in disk file, no data eviction issue as Memcached, suitable for session data scenarios.</li>
 <li>
-<strong>Big</strong>: can store data bigger than memory.</li>
+<strong>Big</strong>: can store data size bigger than memory.</li>
 <li>
-<strong>Effective Memory Usage</strong>: uses only a small amount of heap memory, leverages a hierarchical storage mechanism, only most recently inserted fresh data resides in heap memory, a big amount of less fresh data resides in memory mapped file, a huge amout of old data resides in disk file; hierarchical sotarge ensures high read/write performance, while heap GC has no big performance impact.</li>
+<strong>Effective Memory Usage</strong>: uses only a small amount of heap memory, leverages a hierarchical storage mechanism, only most recently inserted fresh data resides in heap memory, a big amount of less fresh data resides in memory mapped file, a huge amout of old data resides in disk file; hierarchical sotarge ensure high read/write performance, while heap GC has no big performance impact.</li>
 <li>
 <strong>Thread Safe</strong>: supporting multi-threads concurrent and non-blocking access.</li>
 <li>
-<strong>Crash Resistance</strong>: all data is durable, process crashes or dies, all data can be quickly restored by restarting the machine or process.</li>
+<strong>Crash Resistance</strong>: all data is durable, process crashes or dies, all data can be quickly restored by just restarting the machine or process.</li>
 <li>
 <strong>Compaction</strong>: automatic expired and deleted data cleanup, avoiding disk and memory space waste.</li>
 <li>
@@ -67,7 +67,7 @@
 </ol><h2>
 <a name="performance-highlight" class="anchor" href="#performance-highlight"><span class="octicon octicon-link"></span></a>Performance Highlight:</h2>
 
-<p>On normal PC, suppose 10 bytes key and 100 bytes value, randome read can be <strong>&gt; 500,000</strong> ops/sec, random write can be <strong>&gt; 200,000</strong> ops/sec, performance will be better on server grade machine.</p>
+<p>On normal PC, suppose 10 bytes key and 100 bytes value, random read can be <strong>&gt; 500,000</strong> ops/sec, random write can be <strong>&gt; 200,000</strong> ops/sec, performance will be better on server grade machine.</p>
 
 <h2>
 <a name="the-architecture" class="anchor" href="#the-architecture"><span class="octicon octicon-link"></span></a>The Architecture</h2>
