@@ -23,7 +23,8 @@ On normal PC, suppose 10 bytes key and 100 bytes value, random read can be **> 5
 TODO
 
 ## Docs
-TODO
+1. [(Chinese)高性能Key/Value存储引擎SessionDB](https://github.com/ctriposs/sessdb/raw/master/doc/SessionDB.docx)
+
 
 ## Version History
 TODO
