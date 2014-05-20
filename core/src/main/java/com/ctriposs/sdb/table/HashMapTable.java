@@ -186,27 +186,26 @@ public class HashMapTable extends AbstractMapTable {
 		GetResult result = new GetResult();
 		InMemIndex inMemIndex = this.hashMap.get(new ByteArrayWrapper(key));
 		if (inMemIndex == null) return result;
-		synchronized(inMemIndex) {
-			IMapEntry mapEntry = this.getMapEntry(inMemIndex.getIndex());
-			if (mapEntry.isCompressed()) {
-				result.setValue(Snappy.uncompress(mapEntry.getValue()));
-			} else {
-				result.setValue(mapEntry.getValue());
-			}
-			if (mapEntry.isDeleted()) {
-				result.setDeleted(true);
-				return result;
-			}
-			if (mapEntry.isExpired()) {
-				result.setExpired(true);
-				return result;
-			}
-			result.setLevel(this.getLevel());
-			result.setTimeToLive(mapEntry.getTimeToLive());
-			result.setCreatedTime(mapEntry.getCreatedTime());
-
+		
+		IMapEntry mapEntry = this.getMapEntry(inMemIndex.getIndex());
+		if (mapEntry.isCompressed()) {
+			result.setValue(Snappy.uncompress(mapEntry.getValue()));
+		} else {
+			result.setValue(mapEntry.getValue());
+		}
+		if (mapEntry.isDeleted()) {
+			result.setDeleted(true);
 			return result;
 		}
+		if (mapEntry.isExpired()) {
+			result.setExpired(true);
+			return result;
+		}
+		result.setLevel(this.getLevel());
+		result.setTimeToLive(mapEntry.getTimeToLive());
+		result.setCreatedTime(mapEntry.getCreatedTime());
+
+		return result;
 	}
 
 	public void markImmutable(boolean immutable) {

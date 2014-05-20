@@ -216,18 +216,20 @@ public class SDB implements Closeable {
 		this.put(key, new byte[] {0}, AbstractMapTable.NO_TIMEOUT, System.currentTimeMillis(), true);
 	}
 
-	private short getShart(byte[] key) {
+	private short getShard(byte[] key) {
 		int keyHash = Arrays.hashCode(key);
 		keyHash = Math.abs(keyHash);
 		return (short) (keyHash % this.config.getShardNumber());
 	}
 
 	private void put(byte[] key, byte[] value, long timeToLive, long createdTime, boolean isDelete) {
+		Preconditions.checkArgument(key != null && key.length > 0, "key is empty");
+		Preconditions.checkArgument(value != null && value.length > 0, "value is empty");
 		ensureNotClosed();
 		long start = System.nanoTime();
 		String operation = isDelete ? Operations.DELETE : Operations.PUT;
 		try {
-			short shard = this.getShart(key);
+			short shard = this.getShard(key);
 			boolean success = this.activeInMemTables[shard].put(key, value, timeToLive, createdTime, isDelete);
 
 			if (!success) { // overflow
@@ -272,11 +274,12 @@ public class SDB implements Closeable {
 	 * null value if the entry does not exist, or exists but deleted or expired.
 	 */
 	public byte[] get(byte[] key) {
+		Preconditions.checkArgument(key != null && key.length > 0, "key is empty");
 		ensureNotClosed();
 		long start = System.nanoTime();
 		int reachedLevel = INMEM_LEVEL;
 		try {
-			short shard = this.getShart(key);
+			short shard = this.getShard(key);
 			// check active hashmap table first
 			GetResult result = this.activeInMemTables[shard].get(key);
 			if (result.isFound()) {
