@@ -11,7 +11,7 @@ public class LevelQueue extends LinkedList<AbstractMapTable> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+	private ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
 	private WriteLock writeLock = readWriteLock.writeLock();
 	private ReadLock readLock = readWriteLock.readLock();
 	
