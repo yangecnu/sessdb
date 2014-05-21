@@ -13,7 +13,8 @@ A Big, Fast, Persistent Key/Value Store based on a variant of LSM(Log Structured
 8. **Light in Design & Implementation**: simple interface similar to Map, only supports Get/Put/Delete operations, cross platform Java based, small codebase size, embeddable.
 
 ## Performance Highlight:
-On normal PC, suppose 10 bytes key and 100 bytes value, random read can be **> 500,000** ops/sec, random write can be **> 200,000** ops/sec, performance will be better on server grade machine.
+Suppose 10 bytes key and 100 bytes value, on normal PC, random read can be **> 500,000** ops/sec, random write can be **> 200,000** ops/sec;
+On server grade machine, random read can be **> 2,000,000** ops/sec, random write can be **> 500,000** ops/sec.
 
 
 ## The Architecture

@@ -17,13 +17,25 @@ subprojects {
 }
 
 project(':core') {
-	
 	archivesBaseName = 'sessdb'
-	
+
     dependencies {
-		compile 'com.google.guava:guava:16.0.1'
-		compile 'org.xerial.snappy:snappy-java:1.0.4.1'
+        compile 'com.google.guava:guava:16.0.1'
+        compile 'org.xerial.snappy:snappy-java:1.0.4.1'
         compile 'org.slf4j:slf4j-api:1.7.5'
+    }
+}
+
+project(':benchmark') {
+    apply plugin:'application'
+    mainClassName = 'com.ctriposs.sdb.benchmark.SdbBenchmark'
+
+    dependencies {
+        compile project(':core');
+        compile 'com.ctriposs:bigmap:1.0.0'
+        compile 'com.sleepycat:je:5.0.73'
+        compile 'org.mapdb:mapdb:1.0.1'
+        runtime 'org.slf4j:slf4j-nop:1.7.5'
     }
 }
 
