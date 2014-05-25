@@ -92,7 +92,7 @@ Download java from repository mentioned in version history section below, latest
         }
 ```
 
-See sample maven project [here](https://github.com/ctriposs/sessdb/tree/master/sample). 
+See sample maven project [here](https://github.com/ctriposs/sessdb/tree/master/sample/helloworld/hello). 
 
 For simple usage, please refer to source [HelloSessDB.java](https://raw.githubusercontent.com/ctriposs/sessdb/master/sample/helloworld/hello/src/main/java/com/ctriposs/sdb/sample/HelloSessDB.java).
 
