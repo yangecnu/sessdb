@@ -24,12 +24,13 @@ On server grade machine, random read can be **> 2,000,000** ops/sec, random writ
 ![sessdb architecture](https://raw.githubusercontent.com/ctriposs/sessdb/master/doc/sessdb_arch.png)
 
 ## How to Use
-1. Direct jar or source reference
+* Direct jar or source reference
 Download java from repository mentioned in version history section below, latest stable release is [1.0.0](https://github.com/ctriposs/ctriposs-repo/tree/master/repository/com/ctriposs/sdb/sessdb/1.0.0).
-***Note*** : sessdb depends on slf4j, google guava, snappy compression library, for details, please refer to pom [here](https://github.com/ctriposs/ctriposs-repo/blob/master/repository/com/ctriposs/sdb/sessdb/1.0.0/sessdb-1.0.0.pom).
+>***Note*** : sessdb depends on slf4j, google guava, snappy compression library, for details, please refer to pom [here](https://github.com/ctriposs/ctriposs-repo/blob/master/repository/com/ctriposs/sdb/sessdb/1.0.0/sessdb-1.0.0.pom).
 
-2. Maven reference
-```
+* Maven reference
+
+```xml
     <dependency>
       <groupId>com.ctriposs.sdb</groupId>
       <artifactId>sessdb</artifactId>
@@ -41,7 +42,8 @@ Download java from repository mentioned in version history section below, latest
 	</repository>
 ```
 
-3. Sample Usage
+* Sample Usage
+
 ```java
 
     	// new SessDB with provided DB directory,
