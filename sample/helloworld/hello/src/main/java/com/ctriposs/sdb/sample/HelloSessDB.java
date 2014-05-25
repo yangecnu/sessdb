@@ -2,7 +2,7 @@ package com.ctriposs.sdb.sample;
 
 import java.io.IOException;
 
-import com.ctriposs.sdb.Config;
+import com.ctriposs.sdb.DBConfig;
 import com.ctriposs.sdb.SDB;
 
 /**
@@ -18,7 +18,7 @@ public class HelloSessDB
     {
     	// new SessDB with provided DB directory,
     	// this may open exiting DB if already exists
-        SDB sdb = new SDB(dbDir, Config.SMALL);
+        SDB sdb = new SDB(dbDir, DBConfig.SMALL);
         
         try {
 	        // put key/value into the DB
@@ -62,7 +62,7 @@ public class HelloSessDB
         }
         
         // reopen exiting DB
-        sdb = new SDB(dbDir, Config.SMALL);
+        sdb = new SDB(dbDir, DBConfig.SMALL);
         
         try {
 	        // get stored key/value pairs
