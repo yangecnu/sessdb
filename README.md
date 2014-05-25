@@ -3,13 +3,13 @@
 
 # SessDB
 
-A Big, Fast, Persistent Key/Value Store based on a variant of LSM([Log Structured Merge Tree](http://en.wikipedia.org/wiki/Log-structured_merge-tree)), inspired by Google [LevelDB](http://code.google.com/p/leveldb/).
+A Big, Fast, Persistent Key/Value Store based on a variant of LSM([Log Structured Merge Tree](http://en.wikipedia.org/wiki/Log-structured_merge-tree)), inspired by [Google LevelDB](http://code.google.com/p/leveldb/).
 
 ## Feature Highlight:
 1. **High Read/Write Performance**: write performance close to O(1) direct memory access, worst average read performance close to O(1) disk acess, tailored for session data scenarios, also suitable for caching data scenarios.
 2. **Persistence**: all data is persisted in disk file, no data eviction issue like Memcached, suitable for session data scenarios.
 3. **Big**: can store data size bigger than memory.
-4. **Effective Memory Usage**: uses only a small amount of heap memory, leverages a hierarchical storage mechanism, only most recently inserted fresh data resides in heap memory, a big amount of less fresh data resides in memory mapped file, a huge amout of old data resides in disk file; hierarchical sotarge ensures high read/write performance, while heap GC has no big performance impact.
+4. **Efficient Memory Usage**: uses only a small amount of heap memory, leverages a hierarchical storage mechanism, only most recently inserted fresh data resides in heap memory, a big amount of less fresh data resides in memory mapped file, a huge amout of old data resides in disk file; hierarchical sotarge ensures high read/write performance, while heap GC has no big performance impact.
 5. **Thread Safe**: supporting multi-threads concurrent and non-blocking access.
 6. **Crash Resistance**: all data is durable, process crashes or dies, all data can be quickly restored by just restarting the machine or process.
 7. **Compaction**: automatic expired and deleted data cleanup, avoiding disk and memory space waste.
@@ -25,10 +25,11 @@ On server grade machine, random read can be **> 2,000,000** ops/sec, random writ
 
 ## How to Use
 * Direct jar or source reference
-Download java from repository mentioned in version history section below, latest stable release is [1.0.0](https://github.com/ctriposs/ctriposs-repo/tree/master/repository/com/ctriposs/sdb/sessdb/1.0.0).
+
+Download jar from repository mentioned in version history section below, latest stable release is [1.0.0](https://github.com/ctriposs/ctriposs-repo/tree/master/repository/com/ctriposs/sdb/sessdb/1.0.0).
 >***Note*** : sessdb depends on slf4j, google guava, snappy compression library, for details, please refer to pom [here](https://github.com/ctriposs/ctriposs-repo/blob/master/repository/com/ctriposs/sdb/sessdb/1.0.0/sessdb-1.0.0.pom).
 
-* Maven reference
+* Maven dependency
 
 ```xml
     <dependency>
