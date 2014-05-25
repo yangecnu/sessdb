@@ -39,10 +39,17 @@
         <ul></ul>
       </nav>
       <section>
-        <h1>
+        <h2>
+<a name="disclaimer" class="anchor" href="#disclaimer"><span class="octicon octicon-link"></span></a><em>DISCLAIMER</em>
+</h2>
+
+<h4>
+<a name="this-project-is-still-under-construction-beta-testers-are-more-than-welcome" class="anchor" href="#this-project-is-still-under-construction-beta-testers-are-more-than-welcome"><span class="octicon octicon-link"></span></a>This project is still under construction. Beta testers are more than welcome.</h4>
+
+<h1>
 <a name="sessdb" class="anchor" href="#sessdb"><span class="octicon octicon-link"></span></a>SessDB</h1>
 
-<p>A Big, Fast, Persistent Key/Value Store based on a variant of LSM(Log Structured Merge Tree).</p>
+<p>A Big, Fast, Persistent Key/Value Store based on a variant of LSM(<a href="http://en.wikipedia.org/wiki/Log-structured_merge-tree">Log Structured Merge Tree</a>), inspired by Google <a href="http://code.google.com/p/leveldb/">LevelDB</a>.</p>
 
 <h2>
 <a name="feature-highlight" class="anchor" href="#feature-highlight"><span class="octicon octicon-link"></span></a>Feature Highlight:</h2>
@@ -51,11 +58,11 @@
 <li>
 <strong>High Read/Write Performance</strong>: write performance close to O(1) direct memory access, worst average read performance close to O(1) disk acess, tailored for session data scenarios, also suitable for caching data scenarios.</li>
 <li>
-<strong>Persistence</strong>: all data is persisted in disk file, no data eviction issue as Memcached, suitable for session data scenarios.</li>
+<strong>Persistence</strong>: all data is persisted in disk file, no data eviction issue like Memcached, suitable for session data scenarios.</li>
 <li>
 <strong>Big</strong>: can store data size bigger than memory.</li>
 <li>
-<strong>Effective Memory Usage</strong>: uses only a small amount of heap memory, leverages a hierarchical storage mechanism, only most recently inserted fresh data resides in heap memory, a big amount of less fresh data resides in memory mapped file, a huge amout of old data resides in disk file; hierarchical sotarge ensure high read/write performance, while heap GC has no big performance impact.</li>
+<strong>Effective Memory Usage</strong>: uses only a small amount of heap memory, leverages a hierarchical storage mechanism, only most recently inserted fresh data resides in heap memory, a big amount of less fresh data resides in memory mapped file, a huge amout of old data resides in disk file; hierarchical sotarge ensures high read/write performance, while heap GC has no big performance impact.</li>
 <li>
 <strong>Thread Safe</strong>: supporting multi-threads concurrent and non-blocking access.</li>
 <li>
@@ -63,11 +70,12 @@
 <li>
 <strong>Compaction</strong>: automatic expired and deleted data cleanup, avoiding disk and memory space waste.</li>
 <li>
-<strong>Light in Design &amp; Implementation</strong>: simple interface similar to Map, only supports Get/Put/Delete operations, cross platform Java based, small codebase size, embeddable.</li>
+<strong>Light in Design &amp; Implementation</strong>: simple Map like interface, only supports Get/Put/Delete operations, cross platform Java based, small codebase size, embeddable.</li>
 </ol><h2>
 <a name="performance-highlight" class="anchor" href="#performance-highlight"><span class="octicon octicon-link"></span></a>Performance Highlight:</h2>
 
-<p>On normal PC, suppose 10 bytes key and 100 bytes value, random read can be <strong>&gt; 500,000</strong> ops/sec, random write can be <strong>&gt; 200,000</strong> ops/sec, performance will be better on server grade machine.</p>
+<p>Suppose 10 bytes key and 100 bytes value, on normal PC, random read can be <strong>&gt; 500,000</strong> ops/sec, random write can be <strong>&gt; 200,000</strong> ops/sec;
+On server grade machine, random read can be <strong>&gt; 2,000,000</strong> ops/sec, random write can be <strong>&gt; 500,000</strong> ops/sec.</p>
 
 <h2>
 <a name="the-architecture" class="anchor" href="#the-architecture"><span class="octicon octicon-link"></span></a>The Architecture</h2>
@@ -77,22 +85,100 @@
 <h2>
 <a name="how-to-use" class="anchor" href="#how-to-use"><span class="octicon octicon-link"></span></a>How to Use</h2>
 
-<p>TODO</p>
+<ul>
+<li>
+<p>Direct jar or source reference
+Download java from repository mentioned in version history section below, latest stable release is <a href="https://github.com/ctriposs/ctriposs-repo/tree/master/repository/com/ctriposs/sdb/sessdb/1.0.0">1.0.0</a>.</p>
+
+<blockquote>
+<p><strong><em>Note</em></strong> : sessdb depends on slf4j, google guava, snappy compression library, for details, please refer to pom <a href="https://github.com/ctriposs/ctriposs-repo/blob/master/repository/com/ctriposs/sdb/sessdb/1.0.0/sessdb-1.0.0.pom">here</a>.</p>
+</blockquote>
+</li>
+<li><p>Maven reference</p></li>
+</ul><div class="highlight highlight-xml"><pre>    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>com.ctriposs.sdb<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>sessdb<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;repository&gt;</span>
+      <span class="nt">&lt;id&gt;</span>github.ctriposs.repo<span class="nt">&lt;/id&gt;</span>
+      <span class="nt">&lt;url&gt;</span>https://raw.githubusercontent.com/ctriposs/ctriposs-repo/master/repository/<span class="nt">&lt;/url&gt;</span>
+    <span class="nt">&lt;/repository&gt;</span>
+</pre></div>
+
+<ul>
+<li>Sample Usage</li>
+</ul><div class="highlight highlight-java"><pre>
+        <span class="c1">// new SessDB with provided DB directory,</span>
+        <span class="c1">// this may open exiting DB if already exists</span>
+        <span class="n">SDB</span> <span class="n">sdb</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SDB</span><span class="o">(</span><span class="n">dbDir</span><span class="o">,</span> <span class="n">DBConfig</span><span class="o">.</span><span class="na">SMALL</span><span class="o">);</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// put key/value into the DB</span>
+            <span class="n">sdb</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"helloKey"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(),</span> <span class="s">"helloValue"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+            <span class="c1">// get value from the DB by key</span>
+            <span class="kt">byte</span><span class="o">[]</span> <span class="n">valueBytes</span> <span class="o">=</span> <span class="n">sdb</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"helloKey"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"value for helloKey is "</span> <span class="o">+</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">valueBytes</span><span class="o">));</span>
+
+            <span class="c1">// delete key/value from DB by key</span>
+            <span class="n">sdb</span><span class="o">.</span><span class="na">delete</span><span class="o">(</span><span class="s">"helloKey"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+
+            <span class="c1">// get non-exiting or already deleted key/value will get null value</span>
+            <span class="n">valueBytes</span> <span class="o">=</span> <span class="n">sdb</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"helloKey"</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">valueBytes</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"helloKey has been deleted"</span><span class="o">);</span>
+            <span class="o">}</span>
+
+
+            <span class="c1">// put more key/value pairs</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1024</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="n">sdb</span><span class="o">.</span><span class="na">put</span><span class="o">((</span><span class="s">"key"</span> <span class="o">+</span> <span class="n">i</span><span class="o">).</span><span class="na">getBytes</span><span class="o">(),</span> <span class="o">(</span><span class="s">"value"</span> <span class="o">+</span> <span class="n">i</span><span class="o">).</span><span class="na">getBytes</span><span class="o">());</span>
+            <span class="o">}</span>
+
+            <span class="c1">// get more key/value pairs</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1024</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                <span class="n">valueBytes</span> <span class="o">=</span> <span class="n">sdb</span><span class="o">.</span><span class="na">get</span><span class="o">((</span><span class="s">"key"</span> <span class="o">+</span> <span class="n">i</span><span class="o">).</span><span class="na">getBytes</span><span class="o">());</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">valueBytes</span><span class="o">));</span>
+            <span class="o">}</span>
+
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="c1">// make sure you close the db to shutdown the database</span>
+            <span class="c1">// and avoid resource leaks.</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">sdb</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+</pre></div>
+
+<p>See sample maven project <a href="https://github.com/ctriposs/sessdb/tree/master/sample/helloworld/hello">here</a>. </p>
+
+<p>For simple usage, please refer to source <a href="https://raw.githubusercontent.com/ctriposs/sessdb/master/sample/helloworld/hello/src/main/java/com/ctriposs/sdb/sample/HelloSessDB.java">HelloSessDB.java</a>.</p>
+
+<p>For advanced usage involving serialization, multi-threading, huge amount of key/value pairs(&gt;1,000,000), please refer to source <a href="https://raw.githubusercontent.com/ctriposs/sessdb/master/sample/helloworld/hello/src/test/java/com/ctriposs/sdb/sample/SDBPerfTest.java">SDBPerfTest.java</a>.</p>
 
 <h2>
 <a name="docs" class="anchor" href="#docs"><span class="octicon octicon-link"></span></a>Docs</h2>
 
-<p>TODO</p>
-
-<h2>
+<ol>
+<li><a href="https://github.com/ctriposs/sessdb/raw/master/doc/SessionDB.docx">(Chinese)高性能Key/Value存储引擎SessionDB</a></li>
+</ol><h2>
 <a name="version-history" class="anchor" href="#version-history"><span class="octicon octicon-link"></span></a>Version History</h2>
 
-<p>TODO</p>
+<h4>
+<a name="100--may-25-2014--repository" class="anchor" href="#100--may-25-2014--repository"><span class="octicon octicon-link"></span></a>1.0.0 — <em>May 25, 2014</em> : <a href="https://github.com/ctriposs/ctriposs-repo/tree/master/repository/com/ctriposs/sdb/sessdb/1.0.0">repository</a>
+</h4>
 
-<h2>
+<ul>
+<li>Initial version:)</li>
+</ul><h2>
 <a name="copyright-and-license" class="anchor" href="#copyright-and-license"><span class="octicon octicon-link"></span></a>Copyright and License</h2>
 
-<p>Copyright 2012 ctriposs</p>
+<p>Copyright 2014 ctriposs</p>
 
 <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License. You may obtain a copy of the License in the LICENSE file, or at:</p>
 
