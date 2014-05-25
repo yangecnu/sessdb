@@ -93,11 +93,11 @@ Download jar from repository mentioned in version history section below, latest 
         }
 ```
 
-See sample maven project [here](https://github.com/ctriposs/sessdb/tree/master/sample/helloworld/hello). 
+See sample maven project [here](https://github.com/ctriposs/sessdb/tree/master/sample/hello). 
 
-For simple usage, please refer to source [HelloSessDB.java](https://raw.githubusercontent.com/ctriposs/sessdb/master/sample/helloworld/hello/src/main/java/com/ctriposs/sdb/sample/HelloSessDB.java).
+For simple usage, please refer to source [HelloSessDB.java](https://raw.githubusercontent.com/ctriposs/sessdb/master/sample/hello/src/main/java/com/ctriposs/sdb/sample/HelloSessDB.java).
 
-For advanced usage involving serialization, multi-threading, huge amount of key/value pairs(>1,000,000), please refer to source [SDBPerfTest.java](https://raw.githubusercontent.com/ctriposs/sessdb/master/sample/helloworld/hello/src/test/java/com/ctriposs/sdb/sample/SDBPerfTest.java).
+For advanced usage involving serialization, multi-threading, huge amount of key/value pairs(>1,000,000), please refer to source [SDBPerfTest.java](https://raw.githubusercontent.com/ctriposs/sessdb/master/sample/hello/src/test/java/com/ctriposs/sdb/sample/SDBPerfTest.java).
 
 
 ## Docs
