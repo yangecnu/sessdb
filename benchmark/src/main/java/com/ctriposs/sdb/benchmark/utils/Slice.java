@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.ctriposs.sdb.utils;
+package com.ctriposs.sdb.benchmark.utils;
 
 import com.google.common.base.Preconditions;
 
@@ -28,7 +28,7 @@ import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import static com.ctriposs.sdb.utils.SizeOf.*;
+import static com.ctriposs.sdb.benchmark.utils.SizeOf.*;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 /**

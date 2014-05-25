@@ -1,12 +1,12 @@
 package com.ctriposs.sdb;
 
-public class Config {
+public class DBConfig {
 	
-	public static final Config SMALL = new Config().setShardNumber((short)1);
-	public static final Config DEFAULT = new Config().setShardNumber((short)4);
-	public static final Config BIG = new Config().setShardNumber((short)8);
-	public static final Config LARGE = new Config().setShardNumber((short)16);
-	public static final Config HUGE = new Config().setShardNumber((short)32);
+	public static final DBConfig SMALL = new DBConfig().setShardNumber((short)1);
+	public static final DBConfig DEFAULT = new DBConfig().setShardNumber((short)4);
+	public static final DBConfig BIG = new DBConfig().setShardNumber((short)8);
+	public static final DBConfig LARGE = new DBConfig().setShardNumber((short)16);
+	public static final DBConfig HUGE = new DBConfig().setShardNumber((short)32);
 	
 	private short shardNumber = 4;
 	
@@ -36,12 +36,12 @@ public class Config {
 	 * @param compressionEnabled
 	 * @return Session DB configuration
 	 */
-	public Config setCompressionEnabled(boolean compressionEnabled) {
+	public DBConfig setCompressionEnabled(boolean compressionEnabled) {
 		this.compressionEnabled = compressionEnabled;
 		return this;
 	}
 	
-	private Config setShardNumber(short shardNumber) {
+	private DBConfig setShardNumber(short shardNumber) {
 		this.shardNumber = shardNumber;
 		return this;
 	}
@@ -53,7 +53,7 @@ public class Config {
 	 * @param localityEnabled
 	 * @return Session DB configuration
 	 */
-	public Config setLocalityEnabled(boolean localityEnabled) {
+	public DBConfig setLocalityEnabled(boolean localityEnabled) {
 		this.localityEnabled = localityEnabled;
 		return this;
 	}

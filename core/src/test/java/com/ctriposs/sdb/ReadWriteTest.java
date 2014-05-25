@@ -2,7 +2,7 @@ package com.ctriposs.sdb;
 
 import java.io.IOException;
 
-import com.ctriposs.sdb.Config;
+import com.ctriposs.sdb.DBConfig;
 import com.ctriposs.sdb.SDB;
 import com.ctriposs.sdb.utils.TestUtil;
 
@@ -41,7 +41,7 @@ public class ReadWriteTest {
 	}
 	
 	public static void main(String args[]) throws IOException {
-		SDB db = new SDB(testDir, Config.HUGE);
+		SDB db = new SDB(testDir, DBConfig.HUGE);
 		
 		write(db);
 		

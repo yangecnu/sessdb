@@ -2,7 +2,7 @@ package com.ctriposs.sdb.benchmark;
 
 import java.io.IOException;
 
-import com.ctriposs.sdb.Config;
+import com.ctriposs.sdb.DBConfig;
 import com.ctriposs.sdb.SDB;
 
 public class SdbBenchmark extends DbBenchmark {
@@ -19,7 +19,7 @@ public class SdbBenchmark extends DbBenchmark {
 
 	@Override
 	public void open() {
-	    	Config config = new Config();
+	    	DBConfig config = new DBConfig();
 	    	config.setCompressionEnabled(this.getCompressMode());
 		sdb_ = new SDB(databaseDir_, config);
 	}

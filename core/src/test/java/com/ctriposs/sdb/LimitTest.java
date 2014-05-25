@@ -1,6 +1,6 @@
 package com.ctriposs.sdb;
 
-import com.ctriposs.sdb.Config;
+import com.ctriposs.sdb.DBConfig;
 import com.ctriposs.sdb.SDB;
 import com.ctriposs.sdb.utils.DateFormatter;
 import com.ctriposs.sdb.utils.TestUtil;
@@ -10,7 +10,7 @@ public class LimitTest {
 	private static String testDir = TestUtil.TEST_BASE_DIR + "sdb/unit/limit_test";
 	
 	public static void main(String args[]) {
-		SDB db = new SDB(testDir, Config.SMALL);
+		SDB db = new SDB(testDir, DBConfig.SMALL);
 		
 		String rndString = TestUtil.randomString(10);
 		

@@ -1,7 +1,8 @@
-package com.ctriposs.sdb;
+package com.ctriposs.sdb.sample;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,17 +15,11 @@ import java.util.concurrent.Future;
 import org.junit.After;
 import org.junit.Test;
 
-import com.ctriposs.sdb.DBConfig;
 import com.ctriposs.sdb.SDB;
-import com.ctriposs.sdb.table.AbstractMapTable;
-import com.ctriposs.sdb.table.HashMapTablePerfTest.SampleValue;
-import com.ctriposs.sdb.utils.TestUtil;
-
-import static com.ctriposs.sdb.table.HashMapTablePerfTest.users;
 
 public class SDBPerfTest {
 	
-	private static String testDir = TestUtil.TEST_BASE_DIR + "sdb/unit/ydb_perf_test";
+	private static String testDir = "d:/sample/hello/sdb_perf_test";
 	
 	private SDB db;
 	
@@ -32,7 +27,7 @@ public class SDBPerfTest {
 	
 	@Test
 	public void testPut() throws IOException, ClassNotFoundException {
-		int count = 400000;
+		int count = 1000000;
 		
 		db = new SDB(testDir);
 		
@@ -40,12 +35,11 @@ public class SDBPerfTest {
 		
 		final SampleValue value = new SampleValue();
 		StringBuilder user = new StringBuilder();
-		System.out.println(value.toBytes().length);
 		for(int i = 0; i < count; i++) {
 			value.ee = i;
 			value.gg = i;
 			value.ii = i;
-			db.put(users(user, i).getBytes(), value.toBytes(), AbstractMapTable.NO_TIMEOUT);
+			db.put(users(user, i).getBytes(), value.toBytes());
 		}
 		for(int i = 0; i < count; i++) {
 			byte[] result = db.get(users(user, i).getBytes());
@@ -65,6 +59,11 @@ public class SDBPerfTest {
         long time = System.nanoTime() - start;
         System.out.printf("Put/get %,d K operations per second%n",
                 (int) (count * 4 * 1e6 / time));
+        
+		for(int i = 0; i < count; i++) {
+			byte[] result = db.get(users(user, i).getBytes());
+			assertNull(result);
+		}
 	}
 	
 	@Test
@@ -73,8 +72,8 @@ public class SDBPerfTest {
 		
 		System.out.println("Starting test");
 		
-		db = new SDB(testDir, DBConfig.LARGE);
-		final int COUNT = 2000000;
+		db = new SDB(testDir);
+		final int COUNT = 4000000;
 		
 		long start = System.nanoTime();
 		List<Future<?>> futures = new ArrayList<Future<?>>();
@@ -82,7 +81,6 @@ public class SDBPerfTest {
 			final int finalT = t;
 			futures.add(es.submit(new Runnable() {
 
-				@Override
 				public void run() {
 					try {
 						final SampleValue value = new SampleValue();
@@ -91,7 +89,7 @@ public class SDBPerfTest {
 	                        value.ee = i;
 	                        value.gg = i;
 	                        value.ii = i;
-	                        db.put(users(user, i).getBytes(), value.toBytes(), AbstractMapTable.NO_TIMEOUT);
+	                        db.put(users(user, i).getBytes(), value.toBytes());
 	                    }
 	                    
 	                    for (int i = finalT; i < COUNT; i += N_THREADS) {
@@ -125,6 +123,12 @@ public class SDBPerfTest {
         System.out.printf("Put/get %,d K operations per second%n",
                 (int) (COUNT * 4 * 1e6 / time));
         es.shutdown();
+        
+        StringBuilder user = new StringBuilder();
+		for(int i = 0; i < COUNT; i++) {
+			byte[] result = db.get(users(user, i).getBytes());
+			assertNull(result);
+		}
 		
 	}
 	
@@ -135,5 +139,12 @@ public class SDBPerfTest {
 			db.destory();
 		}
 	}
+	
+	public static String users(StringBuilder user, int i) {
+        user.setLength(0);
+        user.append("user:");
+        user.append(i);
+        return user.toString();
+    }
 
 }

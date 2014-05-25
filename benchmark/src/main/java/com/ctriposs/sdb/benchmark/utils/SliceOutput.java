@@ -1,4 +1,4 @@
-package com.ctriposs.sdb.utils;
+package com.ctriposs.sdb.benchmark.utils;
 
 import java.io.DataOutput;
 import java.io.IOException;

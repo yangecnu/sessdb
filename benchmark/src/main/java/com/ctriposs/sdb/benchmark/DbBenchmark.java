@@ -20,10 +20,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.xerial.snappy.Snappy;
 
-import com.ctriposs.sdb.utils.Slice;
-import com.ctriposs.sdb.utils.SliceOutput;
-import com.ctriposs.sdb.utils.Slices;
-import com.ctriposs.sdb.utils.TestUtil;
+import com.ctriposs.sdb.benchmark.utils.Slice;
+import com.ctriposs.sdb.benchmark.utils.SliceOutput;
+import com.ctriposs.sdb.benchmark.utils.Slices;
+import com.ctriposs.sdb.benchmark.utils.TestUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;

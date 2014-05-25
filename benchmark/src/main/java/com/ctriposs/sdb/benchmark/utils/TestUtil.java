@@ -1,4 +1,4 @@
-package com.ctriposs.sdb.utils;
+package com.ctriposs.sdb.benchmark.utils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -27,7 +27,7 @@ public class TestUtil {
 		}
 	}
 	
-	public static final String TEST_BASE_DIR = "/sdb_test/";
+	public static final String TEST_BASE_DIR = "d:/sdb_test/";
 	
 	public static String kbString(long memBytes) {
 		return MEM_FMT.format(memBytes / 1024) + " kb";

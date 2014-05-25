@@ -46,7 +46,7 @@ public class SDB implements Closeable {
 	private final SDBStats stats = new SDBStats();
 
 	private String dir;
-	private Config config;
+	private DBConfig config;
 	private Level0Merger[] level0Mergers;
 	private Level1Merger[] level1Mergers;
 	private CountDownLatch[] countDownLatches;
@@ -55,11 +55,11 @@ public class SDB implements Closeable {
 	private boolean closed = false;
 
 	public SDB(String dir) {
-		this(dir, new Config());
+		this(dir, new DBConfig());
 	}
 
 	@SuppressWarnings("unchecked")
-	public SDB(String dir, Config config) {
+	public SDB(String dir, DBConfig config) {
 		this.dir = dir;
 		this.config = config;
 
@@ -180,7 +180,7 @@ public class SDB implements Closeable {
 		return this.dir;
 	}
 
-	public Config getConfig() { return this.config; }
+	public DBConfig getConfig() { return this.config; }
 
 	public SDBStats getStats() {
 		return this.stats;
