@@ -22,9 +22,9 @@ import com.ctriposs.sdb.utils.TestUtil;
 
 import static com.ctriposs.sdb.table.HashMapTablePerfTest.users;
 
-public class SDBPerfTest {
+public class SDBPerfTestA {
 	
-	private static String testDir = TestUtil.TEST_BASE_DIR + "sdb/unit/ydb_perf_test";
+	private static String testDir = TestUtil.TEST_BASE_DIR + "sdb/sdb_perf_testa";
 	
 	private SDB db;
 	

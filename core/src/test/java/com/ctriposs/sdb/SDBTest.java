@@ -19,7 +19,7 @@ public class SDBTest {
 	// You can set the STRESS_FACTOR system property to make the tests run more iterations.
 	public static final double STRESS_FACTOR = Double.parseDouble(System.getProperty("STRESS_FACTOR", "1.0"));
 
-	private static String testDir = TestUtil.TEST_BASE_DIR + "sdb/unit/ydb_test";
+	private static String testDir = TestUtil.TEST_BASE_DIR + "sdb/unit/sdb_test";
 
 	private SDB db;
 
