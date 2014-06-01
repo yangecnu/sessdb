@@ -5,6 +5,10 @@
 
 A Big, Fast, Persistent Key/Value Store based on a variant of LSM([Log Structured Merge Tree](http://en.wikipedia.org/wiki/Log-structured_merge-tree)), inspired by [Google LevelDB](http://code.google.com/p/leveldb/).
 
+For a more performant in-memory cache **without persistence** support, please refer to [LevelCache](https://github.com/ctriposs/levelcache) which:
+>1. uses design and algorithm similar to SessDB; 
+2. stores key/vaue data in OffHeap memory instead of Memory Mapped File.
+
 ## Feature Highlight:
 1. **High Read/Write Performance**: write performance close to O(1) direct memory access, worst average read performance close to O(1) disk acess, tailored for session data scenarios, also suitable for caching data scenarios.
 2. **Persistence**: all data is persisted in disk file, no data eviction issue like Memcached, suitable for session data scenarios.
