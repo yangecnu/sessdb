@@ -92,11 +92,11 @@ public class SDBStats {
         getAvgStats("merging.level0.cost");
         getAvgStats("merging.level1.cost");
 
-        getAvgStats("storage.level0.fileCount");
-        getAvgStats("storage.level0.fileSize");
-        getAvgStats("storage.level1.fileCount");
-        getAvgStats("storage.level1.fileSize");
-        getAvgStats("storage.level2.fileCount");
-        getAvgStats("storage.level2.fileSize");
+        getSingleStats("storage.level0.fileCount");
+        getSingleStats("storage.level0.fileSize");
+        getSingleStats("storage.level1.fileCount");
+        getSingleStats("storage.level1.fileSize");
+        getSingleStats("storage.level2.fileCount");
+        getSingleStats("storage.level2.fileSize");
     }
 }
